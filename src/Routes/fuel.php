@@ -21,6 +21,6 @@
  */
 
 Route::get('/fuel')
-    ->name('seatcore::fuel')
+    ->name('seatcore::decoyFuel')
     ->uses('FuelController@getFuel');
 
