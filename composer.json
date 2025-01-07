@@ -1,0 +1,37 @@
+{
+    "name": "recursivetree/seat-billing",
+    "description": "Plugin to assist with corp/alliance billing statements",
+    "type": "seat-plugin",
+    "license": "GPL-2.0-only",
+    "authors": [
+        {
+            "name": "Denngarr B'tarn",
+            "email": "ed.stafford@gmail.com"
+        },
+        {
+            "name": "recursivetree",
+            "email": "recursivetreemail@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Denngarr\\Seat\\Billing\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Denngarr\\Seat\\Billing\\BillingServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": "^8.1",
+        "eveseat/services": "^5.0.1",
+        "laravel/framework": "^10.0",
+        "eveseat/eveapi": "^5.0.1",
+        "eveseat/web": "^5.0.1",
+        "recursivetree/seat-treelib": "^2.1.3"
+    }
+}
