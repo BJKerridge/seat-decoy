@@ -19,16 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-namespace WarAndWormhole\Seat\MumbleRegister;
+namespace BJK\Decoy\Seat;
 
 use Seat\Services\AbstractSeatPlugin;
 
 /**
- * Class MumbleRegisterServiceProvider.
+ * Class DecoyServiceProvider.
  *
- * @package WarAndWormhole\Seat\MumbleRegister
+ * @package BJK\Decoy\Seat
  */
-class DecoyServiceRegister extends AbstractSeatPlugin
+class DecoyServiceProvider extends AbstractSeatPlugin
 {
     public function boot()
     {

@@ -9,6 +9,11 @@
             "email": "bjkerridge@live.co.uk"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "BJK\\Decoy\\Seat\\": "src/"
+        }
+    },
     "minimum-stability": "stable",
     "require": {
         "php": "^8.1",
@@ -17,5 +22,12 @@
         "eveseat/eveapi": "^5.0.1",
         "eveseat/web": "^5.0.1",
         "recursivetree/seat-treelib": "^2.1.3"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BJK\\Decoy\\Seat\\DecoyServiceProvider"
+            ]
+        }
     }
 }
