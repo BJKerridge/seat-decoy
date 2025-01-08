@@ -23,7 +23,6 @@
 namespace BJK\Decoy\Seat\Http\Controllers;
 
 use Carbon\Carbon;
-use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Seat\Web\Http\Controllers\Controller;

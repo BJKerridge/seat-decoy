@@ -30,7 +30,7 @@ use Carbon\Carbon;
 /**
  * Class StructureDataTable.
  *
- * @package Seat\Web\Http\DataTables\Corporation\Military
+ * @package BJK\Decoy\Seat\Http\DataTables\Corporation\Military
  */
 class FuelDataTable extends DataTable
 {
