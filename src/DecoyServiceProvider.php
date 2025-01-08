@@ -61,7 +61,11 @@ class DecoyServiceProvider extends AbstractSeatPlugin
      */
     private function add_publications()
     {
-
+        // $this->publishes([
+        //     __DIR__ . '/resources/css' => public_path('web/css'),
+        //     __DIR__ . '/resources/img' => public_path('mumble/img'),
+        //     __DIR__ . '/resources/js' => public_path('mumble/js'),
+        // ], ['public', 'seat']);
     }
 
     /**
