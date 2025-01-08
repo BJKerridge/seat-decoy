@@ -82,7 +82,7 @@ class FuelController extends Controller
     //$jsonOut = json_encode($results, JSON_PRETTY_PRINT);
     $jsonOut = $results;
     // Return the DataTable view along with the arrays
-    return $dataTable->render('seatcore::decoyFuel', compact('dataTable', 'jsonOut'));
+    return $dataTable->render('decoy::decoyFuel', compact('dataTable', 'jsonOut'));
 
 }
 }

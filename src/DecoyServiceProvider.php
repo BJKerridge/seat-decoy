@@ -81,7 +81,7 @@ class DecoyServiceProvider extends AbstractSeatPlugin
      */
     private function add_views()
     {
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'fuel');
+        $this->loadViewsFrom(__DIR__ . '/resources/views', 'decoy');
     }
 
     /**
