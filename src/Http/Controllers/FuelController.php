@@ -42,7 +42,6 @@ class FuelController extends Controller
      */
     public function index()
     {
-
         return view('decoy::decoyFuel');
     }
 
