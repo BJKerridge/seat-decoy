@@ -26,7 +26,6 @@ use Carbon\Carbon;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Seat\Web\Traits\FuelStats;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Eveapi\Models\Corporation\CorporationInfo;
 use Seat\Web\Http\DataTables\Corporation\Military\FuelDataTable;
@@ -39,7 +38,6 @@ use Seat\Eveapi\Models\Assets\CorporationAsset;
  */
 class FuelController extends Controller
 {
-    use FuelStats;
     public function getFuel(CorporationInfo $corporation, FuelDataTable $dataTable)
 {
     // Initialize empty arrays
