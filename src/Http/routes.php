@@ -1,10 +1,15 @@
 <?php
 
 Route::group([
-    'namespace' => 'BJK\Decoy\Http\Controllers',
-    'middleware' => 'web',
+    'namespace' => 'Seat\Web\Http\Controllers',
+    'middleware' => 'web',   // Web middleware for state etc since L5.3
 ], function () {
-    Route::group([], function () {
+
+    Route::group([
+        // 'namespace' => 'Stock',
+        // 'prefix' => 'stock',
+    ], function () {
+
         include __DIR__ . '/Routes/Fuel.php';
     });
 });
