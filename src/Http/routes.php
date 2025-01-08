@@ -6,5 +6,5 @@ Route::group([
     // 'prefix' => 'stock',
 ], function () {
 
-    include __DIR__ . '/Routes/fuel.php';
+    include __DIR__ . '/Routes/Fuel.php';
 });
