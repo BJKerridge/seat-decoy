@@ -34,10 +34,19 @@ use Seat\Eveapi\Models\Assets\CorporationAsset;
 /**
  * Class HomeController.
  *
- * @package Seat\Web\Http\Controllers
+ * @package BJK\Decoy\Seat\Http\Controllers
  */
 class FuelController extends Controller
 {
+     /**
+     * @return \Illuminate\View\View
+     */
+    public function index()
+    {
+
+        return view('decoy::decoyFuel');
+    }
+
     public function getFuel(CorporationInfo $corporation, FuelDataTable $dataTable)
 {
     // Initialize empty arrays
