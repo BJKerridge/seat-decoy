@@ -61,9 +61,7 @@ class DecoyServiceProvider extends AbstractSeatPlugin
      */
     private function add_publications()
     {
-        $this->publishes([
-            __DIR__ . '/resources/img' => public_path('decoy/img'),
-        ], ['public', 'seat']);
+
     }
 
     /**
