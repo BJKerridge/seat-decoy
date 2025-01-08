@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace Seat\Web\Http\Controllers;
+namespace BJK\Decoy\Seat\Web\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\View\View;
