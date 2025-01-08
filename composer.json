@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "bjk\\seatupgrades\\": "src/"
+            "BJK\\Decoy\\Seat\\": "src/"
         }
     },
     "minimum-stability": "stable",
@@ -26,7 +26,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "bjk\\seatupgrades\\DecoyServiceProvider"
+                "BJK\\Decoy\\Seat\\DecoyServiceProvider"
             ]
         }
     }
