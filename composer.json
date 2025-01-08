@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "BJK\\Decoy\\Seat\\": "src/"
+            "Seat\\Web\\": "src/"
         }
     },
     "minimum-stability": "stable",
