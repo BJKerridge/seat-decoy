@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace Seat\Web\Http\DataTables\Corporation\Military;
+namespace BJK\Decoy\Seat\Http\DataTables\Corporation\Military;
 
 use Illuminate\Http\JsonResponse;
 use Seat\Eveapi\Models\Corporation\CorporationStructure;

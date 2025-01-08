@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace BJK\Decoy\Seat\Web\Http\Controllers;
+namespace BJK\Decoy\Seat\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\View\View;
@@ -28,7 +28,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Eveapi\Models\Corporation\CorporationInfo;
-use Seat\Web\Http\DataTables\Corporation\Military\FuelDataTable;
+use BJK\Decoy\Seat\Http\DataTables\Corporation\Military\FuelDataTable;
 use Seat\Eveapi\Models\Assets\CorporationAsset;
 
 /**
