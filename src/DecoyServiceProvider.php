@@ -45,7 +45,7 @@ class DecoyServiceProvider extends AbstractSeatPlugin
         $this->mergeConfigFrom(__DIR__ . '/Config/decoyFuel.sidebar.php', 'package.sidebar');
 
         // Register generic permissions
-        $this->registerPermissions(__DIR__ . '/Config/decoyFuel.permissions.php', 'decoyFuel');
+        //$this->registerPermissions(__DIR__ . '/Config/decoyFuel.permissions.php', 'decoyFuel');
     }
 
     /**
