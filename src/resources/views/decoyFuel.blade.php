@@ -12,7 +12,7 @@
    <!-- Existing DataTable for $dataTable -->
    <div class="col-12 col-lg-6">
        <div class="card">
-           <div class="card-header text-center"><img src="web\img\fort.png" class="img-fluid center-block"/></div>
+           <div class="card-header text-center"><img src="decoy\img\fort.png" class="img-fluid center-block"/></div>
            <div class="card-body">
                {!! $dataTable->table(['class' => 'table table-hover']) !!}
            </div>
@@ -22,7 +22,7 @@
    <!-- DataTable for StructureID = 35841 -->
    <div class="col-12 col-lg-6">
        <div class="card">
-           <div class="card-header text-center"><img src="web\img\ansi.png" class="img-fluid center-block"/></div>
+           <div class="card-header text-center"><img src="decoy\img\ansi.png" class="img-fluid center-block"/></div>
            <div class="card-body">
                <h4 class="text-center">Ansiblex</h4>
                <table id="jsonTable35841" class="table table-hover">
@@ -41,7 +41,7 @@
        </div>
 
        <div class="card">
-           <div class="card-header text-center"><img src="web\img\metenox.png" class="img-fluid center-block"/></div>
+           <div class="card-header text-center"><img src="decoy\img\metenox.png" class="img-fluid center-block"/></div>
            <div class="card-body">
                <h4 class="text-center">Metenox</h4>
                <table id="jsonTable81826" class="table table-hover">

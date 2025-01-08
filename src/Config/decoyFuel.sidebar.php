@@ -2,7 +2,7 @@
 
 return [
     'decoyFuel' => [
-        'permission' => 'decoy::decoyFuelView',
+        'permission' => 'decoy.decoyFuelView',
         'name' => 'Fuel',
         'icon' => 'fas fa-battery-full',
         'route_segment' => 'decoyFuel',
