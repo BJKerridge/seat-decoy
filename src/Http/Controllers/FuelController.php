@@ -42,10 +42,6 @@ class FuelController extends Controller
     use FuelStats;
     public function getFuel(CorporationInfo $corporation, FuelDataTable $dataTable)
 {
-    public function register(){
-        $this->mergeConfigFrom(__DIR__ . '/Config/decoyFuel.sidebar.php','package.sidebar');
-        $this->registerPermissions(__DIR__ . '/Config/decoyFuel.permissions.php', 'decoyFuel');
-    }
     // Initialize empty arrays
     $ansiblex = [];
     $metenox = [];
