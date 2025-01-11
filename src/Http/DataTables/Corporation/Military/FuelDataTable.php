@@ -59,7 +59,7 @@ class FuelDataTable extends DataTable
 
     // You can now pass the arrays to the view if needed, or you can return them as part of the response
     return datatables()
-        ->eloquent($query)
+        ->eloquent($query->whereNotIn('type_id', [35841, 81826]))
         ->editColumn('type.typeName', function ($row) {
             $first_word = strtok($row->type->typeName, ' ');
             return view('web::partials.type', [
@@ -128,9 +128,9 @@ class FuelDataTable extends DataTable
                     }
                 });
             }',
-                'pageLength' => -1, // Show all rows
                 'lengthChange' => false, // Disable the 'Show X entries' dropdown
                 'order' => [[2, 'asc']],  // Default order by first column (index 0) ascending
+                'paging' => false,
             ]);
     }
 
