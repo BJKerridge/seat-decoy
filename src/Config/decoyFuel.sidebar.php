@@ -8,4 +8,11 @@ return [
         'route_segment' => 'decoyFuel',
         'route' => 'decoy::decoyFuel',
     ],
+    'decoyCombat' => [
+        'permission' => 'decoy.decoyCombatView',
+        'name' => 'Combat',
+        'icon' => 'fas fa-skull-crossbones',
+        'route_segment' => 'decoyCombat',
+        'route' => 'decoy::decoyCombat',
+    ],
 ];
