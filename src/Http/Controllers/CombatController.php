@@ -55,25 +55,25 @@ class CombatController extends Controller
 
     public function getCombat(){
 
-    /* ===== CREATE THE TABLES FOR TRACKING ALLIANCES
+    /* ===== CREATE THE TABLES
      ================================================== */
 
-        $trackerTableName = 'decoy_combat_tracker';
-        if (!Schema::hasTable($trackerTableName)) {
-         Schema::create($trackerTableName, function (Blueprint $table) {
+        $combat_tracker_table = 'decoy_combat_tracker';
+        if (!Schema::hasTable($combat_tracker_table)) {
+         Schema::create($combat_tracker_table, function (Blueprint $table) {
              $table->id();
              $table->unsignedBigInteger('alliance_id')->unique();
              $table->string('alliance_name');
              $table->integer('killmails')->default(0);
              $table->timestamps();
          });
-        $message = "Table $trackerTableName created successfully.";} else {
-        $message = "Table $trackerTableName already exists!";
+        $message = "Table $combat_tracker_table created successfully.";} else {
+        $message = "Table $combat_tracker_table already exists!";
         }
 
-        $userTableName = 'decoy_combat_users';
-        if (!Schema::hasTable($userTableName)) {
-            Schema::create($userTableName, function (Blueprint $table) {
+        $combat_users_table = 'decoy_combat_users';
+        if (!Schema::hasTable($combat_users_table)) {
+            Schema::create($combat_users_table, function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
                 $table->unsignedBigInteger('main_character_id');
@@ -83,11 +83,21 @@ class CombatController extends Controller
                 $table->timestamp('kills_updated_at')->nullable();
                 $table->timestamps();
             });
-            $message2 = "Table $userTableName created successfully.";} else {
-            $message2 = "Table $userTableName already exists!";
+            $message2 = "Table $combat_users_table created successfully.";} else {
+            $message2 = "Table $combat_users_table already exists!";
         }
 
-    /* ==== POPULATE THE TABLE
+        $combat_users_zkill_table = 'decoy_combat_users_zkill';
+        if (!Schema::hasTable($combat_users_zkill_table)) {
+            Schema::create($combat_users_zkill_table, function (Blueprint $table) {
+                $table->id();
+                $table->timestamp('updated_at')->nullable();
+            });
+            $message2 = "Table $combat_users_zkill_table created successfully.";} else {
+            $message2 = "Table $combat_users_zkill_table already exists!";
+        }
+
+    /* ==== POPULATE THE TABLES
      ================================================== */
 
         $allianceList = [99005338, 99003581, 1354830081, 1727758877, 1900696668, 99003214, 99011223, 1042504553, 99009927, 99009163, 99012042, 1411711376, 99011162, 99007203, 99006941, 99002685, 99012982, 99003995, 99007887, 1988009451, 99011416, 99001317, 99012328, 498125261, 386292982, 99001954, 99001969, 99012410, 99007722, 99010877, 99011312, 741557221, 150097440, 1220922756, 99012770, 99010281, 917526329, 99002003, 99010735, 99011990, 99007629, 99011279, 99011983, 99009758, 154104258, 99011268, 99013537, 99012813, 99009977, 99011181, 99013231, 99010389, 99008684, 1614483120, 99012617, 99011852, 99013095, 99008697, 99012485, 99013444, 99000285, 99010517, 99011720, 99008245, 99006751, 922190997, 99012279, 99013590, 99010339, 99012786];
@@ -190,27 +200,36 @@ class CombatController extends Controller
             GET LAST 20 ZKILL PAGES AND ADD TO DATABASE
      ================================================== */
         
-        // $killmailDataNew = [];
-        // $addedCount = $existingCount = 0;
-        // foreach (range(1, 10) as $page) {
-        //     $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
-        //     if (!$response->successful()) {
-        //         $message = "Failed to fetch killmails from page {$page}.";
-        //         break;
-        //     }
-        //     foreach ($response->json() as $killmail) {
-        //         $killmailModel = Killmail::firstOrCreate(
-        //             ['killmail_id' => $killmail['killmail_id']],
-        //             ['killmail_hash' => $killmail['zkb']['hash']]
-        //         );
-        //         $killmailModel->wasRecentlyCreated ? $addedCount++ : $existingCount++;
-        //         $killmailDataNew[] = [
-        //             'killmail_id' => $killmail['killmail_id'],
-        //             'killmail_hash' => $killmail['zkb']['hash'],
-        //         ];
-        //     }
-        //     $message = "{$page} pages loaded! {$addedCount} killmails added, {$existingCount} killmails already existed.";
-        // }
+     $updatedAt = DB::table('decoy_combat_users_zkill')->value('updated_at');
+     if (!$updatedAt || Carbon::parse($updatedAt)->lt(Carbon::now()->subHour())) {
+         $killmailDataNew = [];
+         $addedCount = $existingCount = 0;     
+         foreach (range(1, 5) as $page) {
+             $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
+             if (!$response->successful()) {
+                 $message = "Failed to fetch killmails from page {$page}.";
+                 break;
+             }
+             foreach ($response->json() as $killmail) {
+                $killmailModel = Killmail::firstOrCreate(
+                     ['killmail_id' => $killmail['killmail_id']],
+                     ['killmail_hash' => $killmail['zkb']['hash']]
+                );
+                 $killmailModel->wasRecentlyCreated ? $addedCount++ : $existingCount++;
+                 $killmailDataNew[] = [
+                     'killmail_id' => $killmail['killmail_id'],
+                     'killmail_hash' => $killmail['zkb']['hash'],
+                 ];
+             }
+             $message = "{$page} pages loaded! {$addedCount} killmails added, {$existingCount} killmails already existed.";
+         }
+         DB::table('decoy_combat_users_zkill')->updateOrInsert(
+             ['id' => 1],
+             ['updated_at' => Carbon::now()]
+         );
+     }else{
+        $message = "Timer is too recent";
+     }
      
 
      /* ==================================================
