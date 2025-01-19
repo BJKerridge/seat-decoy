@@ -157,7 +157,7 @@ class CombatController extends Controller
             }
         }
 
-        $toUpdate = DB::table('decoy_combat_users')->whereNull('kills_updated_at')->orWhere('kills_updated_at', '<', Carbon::now()->subHours(3))->pluck('main_character_id')->toArray();
+        $toUpdate = DB::table('decoy_combat_users')->whereNull('kills_updated_at')->orWhere('kills_updated_at', '<', Carbon::now()->subHour())->pluck('main_character_id')->toArray();
         foreach ($toUpdate as $mainCharacterId) {
             $user = DB::table('decoy_combat_users')->where('main_character_id', $mainCharacterId)->first();
             $associatedCharacterIds = json_decode($user->associated_character_ids, true);
@@ -204,7 +204,7 @@ class CombatController extends Controller
      if (!$updatedAt || Carbon::parse($updatedAt)->lt(Carbon::now()->subHour())) {
          $killmailDataNew = [];
          $addedCount = $existingCount = 0;     
-         foreach (range(1, 5) as $page) {
+         foreach (range(1, 3) as $page) {
              $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
              if (!$response->successful()) {
                  $message = "Failed to fetch killmails from page {$page}.";
