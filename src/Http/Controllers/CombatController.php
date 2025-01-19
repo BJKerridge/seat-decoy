@@ -157,12 +157,18 @@ class CombatController extends Controller
             }
         }
 
-        $toUpdate = DB::table('decoy_combat_users')->whereNull('kills_updated_at')->orWhere('kills_updated_at', '<', Carbon::now()->subHour())->pluck('main_character_id')->toArray();
+        $toUpdate = DB::table('decoy_combat_users')->whereNull('kills_updated_at')->orWhere('kills_updated_at', '<', Carbon::now()->subMinutes(20))->pluck('main_character_id')->toArray();
+        
         foreach ($toUpdate as $mainCharacterId) {
             $user = DB::table('decoy_combat_users')->where('main_character_id', $mainCharacterId)->first();
             $associatedCharacterIds = json_decode($user->associated_character_ids, true);
-            $killmailData = KillmailAttacker::whereIn('character_id', $associatedCharacterIds)
-                ->where('created_at', '>=', Carbon::now()->subDays(30))->select('killmail_id')->distinct()->get();
+            $killmailData = DB::table('killmail_attackers')
+                ->join('killmail_details', 'killmail_attackers.killmail_id', '=', 'killmail_details.killmail_id')
+                ->whereIn('killmail_attackers.character_id', $associatedCharacterIds)
+                ->where('killmail_details.killmail_time', '>=', Carbon::now()->subDays(30)) // Filter by killmail_time in last 30 days
+                ->select('killmail_attackers.killmail_id')
+                ->distinct()
+                ->get();
             $distinctKillmailCount = $killmailData->count();
             DB::table('decoy_combat_users')
                 ->where('main_character_id', $mainCharacterId)
@@ -187,7 +193,7 @@ class CombatController extends Controller
                 return (object) [
                     'alliance_id' => $data->alliance_id,
                     'name' => $data->alliance_name,
-                    'count' => $data->killmails, // PvP Kills in last 30 days
+                    'count' => $data->killmails,
                 ];
             })->sortByDesc('count')->values();
         }     
@@ -201,10 +207,10 @@ class CombatController extends Controller
      ================================================== */
         
      $updatedAt = DB::table('decoy_combat_users_zkill')->value('updated_at');
-     if (!$updatedAt || Carbon::parse($updatedAt)->lt(Carbon::now()->subHour())) {
+     if (!$updatedAt || Carbon::parse($updatedAt)->lt(Carbon::now()->subMinutes(2))) {
          $killmailDataNew = [];
          $addedCount = $existingCount = 0;     
-         foreach (range(1, 3) as $page) {
+         foreach (range(1, 15) as $page) {
              $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
              if (!$response->successful()) {
                  $message = "Failed to fetch killmails from page {$page}.";

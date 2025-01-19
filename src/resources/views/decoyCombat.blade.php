@@ -42,7 +42,7 @@
                     <span class="info-box-icon elevation-1"><img src="//images.evetech.net/alliances/{{ $ledger->alliance_id }}/logo?size=64"></span>
                     <div class="info-box-content">
                         <span class="info-box-text">{{ $ledger->name }}</span>
-                        <span class="info-box-number">{{ $ledger->count }}</span>
+                        <span class="info-box-number">{{ number_format($ledger->count, 0, '.', ',') }}</span>
                     </div><!-- /.info-box-content -->
                     </div><!-- /.info-box -->
                 </div><!-- /.col-md-4 col-sm-6 -->
@@ -66,7 +66,7 @@
                     <span class="info-box-icon elevation-1"><img src="//images.evetech.net/alliances/{{ $ledger->alliance_id }}/logo?size=64"></span>
                     <div class="info-box-content">
                         <span class="info-box-text">{{ $ledger->name }}</span>
-                        <span class="info-box-number">{{ $ledger->count }}</span>
+                        <span class="info-box-number">{{ number_format($ledger->count, 0, '.', ',') }}</span>
                     </div><!-- /.info-box-content -->
                     </div><!-- /.info-box -->
                 </div><!-- /.col-md-4 col-sm-6 -->
@@ -89,7 +89,7 @@
                     <span class="info-box-icon elevation-1"><img src="//images.evetech.net/alliances/{{ $ledger->alliance_id }}/logo?size=64"></span>
                     <div class="info-box-content">
                         <span class="info-box-text">{{ $ledger->name }}</span>
-                        <span class="info-box-number">{{ $ledger->count }}</span>
+                        <span class="info-box-number">{{ number_format($ledger->count, 0, '.', ',') }}</span>
                     </div><!-- /.info-box-content -->
                     </div><!-- /.info-box -->
                 </div><!-- /.col-md-4 col-sm-6 -->
