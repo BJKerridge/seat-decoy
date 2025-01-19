@@ -78,7 +78,7 @@ class CombatController extends Controller
                 $table->string('name');
                 $table->unsignedBigInteger('main_character_id');
                 $table->json('associated_character_ids');
-                $table->integer('killmails')->default(0);
+                $table->json('killmails')->default(json_encode([]));
                 $table->timestamp('users_updated_at')->nullable();
                 $table->timestamp('kills_updated_at')->nullable();
                 $table->timestamps();
@@ -141,17 +141,23 @@ class CombatController extends Controller
      ================================================== */
 
         $recentUserUpdate = DB::table('decoy_combat_users')->max('users_updated_at');
-        if (!$recentUserUpdate || Carbon::parse($recentUserUpdate)->lt(Carbon::now()->subHours(6))) {
+        if (!$recentUserUpdate || Carbon::parse($recentUserUpdate)->lt(Carbon::now()->subHours(1))) {
             $corpIds = AllianceMember::where('alliance_id', 99012410)->pluck('corporation_id');
             $corpPilots = CorporationMember::whereIn('corporation_id', $corpIds)->pluck('character_id');
             $characterList = User::whereIn('main_character_id', $corpPilots)->get();
             $userIds = $characterList->pluck('id');
+        
             foreach ($characterList as $user) {
                 $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->withTrashed()->pluck('character_id');
+        
+                // Convert collections to arrays before using array_intersect()
+                $filteredCharacters = array_values(array_intersect($associatedCharacterIds->toArray(), $corpPilots->toArray()));
+
+        
                 DB::table('decoy_combat_users')->insert([
                     'name' => $user->name,
                     'main_character_id' => $user->main_character_id,
-                    'associated_character_ids' => json_encode($associatedCharacterIds),
+                    'associated_character_ids' => json_encode($filteredCharacters),
                     'users_updated_at' => Carbon::now(),
                 ]);
             }
@@ -173,12 +179,12 @@ class CombatController extends Controller
             DB::table('decoy_combat_users')
                 ->where('main_character_id', $mainCharacterId)
                 ->update([
-                    'killmails' => $distinctKillmailCount,
+                    'killmails' => $killmailData,
                     'kills_updated_at' => Carbon::now(),
                 ]);
         }
 
-        $formattedCharacterList = DB::table('decoy_combat_users')->select('main_character_id', 'name', 'killmails')->orderByDesc('killmails')->limit(20)->get()->toArray();
+        $formattedCharacterList = DB::table('decoy_combat_users')->select('main_character_id', 'name', DB::raw('JSON_LENGTH(killmails) as killmails'))->orderByDesc(DB::raw('JSON_LENGTH(killmails)'))->limit(20)->get()->toArray();
 
     /* ==== GET THE FRIENDLY/NEUTRAL/HOSTILE PAGE
      ================================================== */
@@ -254,6 +260,6 @@ class CombatController extends Controller
             RETURN THE VIEW
      ================================================== */
 
-        return view('decoy::decoyCombat', compact('killmailLedgerFriendly', 'killmailLedgerHostile', 'killmailLedgerNeutral', 'formattedCharacterList', 'message', 'message2'))->render();
+        return view('decoy::decoyCombat', compact('killmailLedgerFriendly', 'killmailLedgerHostile', 'killmailLedgerNeutral', 'formattedCharacterList', 'message'))->render();
     }
 }

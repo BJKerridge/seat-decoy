@@ -2,6 +2,7 @@
 
 use BJK\Decoy\Seat\Http\Controllers\FuelController;
 use BJK\Decoy\Seat\Http\Controllers\CombatController;
+use BJK\Decoy\Seat\Http\Controllers\CombatUserController;
 
 Route::group([
     'middleware' => ['web', 'auth'],
@@ -17,3 +18,9 @@ Route::group([
         ->name('decoy::decoyCombat');
 });
 
+Route::group([
+    'middleware' => ['web', 'auth'],
+], function (): void {
+    Route::get('/combat/{id}', [CombatUserController::class, 'getCombatUser'])
+        ->name('decoy::decoyCombatUser');
+});

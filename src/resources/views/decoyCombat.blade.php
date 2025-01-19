@@ -7,6 +7,7 @@
 <script>
     console.log(@json($message));
 </script>
+
 <div class="row"><!-- row -->
     <div class="col-md-12">
         <div class="card card-default">
@@ -15,6 +16,7 @@
                 <div class="row">
                 @foreach($formattedCharacterList as $ledger)
                 <div class="col-md-3 col-sm-4">
+                    <a href="/combat/{{ $ledger->main_character_id }}" class="d-block" style="text-decoration: none; color: inherit;">
                     <div class="info-box">
                     <span class="info-box-icon elevation-1"><img src="//images.evetech.net/characters/{{ $ledger->main_character_id }}/portrait?size=64"></span> <!-- Change from $ledger->id -->
                     <div class="info-box-content">
@@ -22,6 +24,7 @@
                         <span class="info-box-number">{{ $ledger->killmails }}</span> <!-- Change from $ledger->killmail_count -->
                         </div><!-- /.info-box-content -->
                     </div><!-- /.info-box -->
+                </a>
                 </div><!-- /.col-md-4 col-sm-6 -->
                 @endforeach
                 </div>
