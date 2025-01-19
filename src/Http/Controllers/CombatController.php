@@ -207,10 +207,10 @@ class CombatController extends Controller
      ================================================== */
         
      $updatedAt = DB::table('decoy_combat_users_zkill')->value('updated_at');
-     if (!$updatedAt || Carbon::parse($updatedAt)->lt(Carbon::now()->subMinutes(2))) {
+     if (!$updatedAt || Carbon::parse($updatedAt)->lt(Carbon::now()->subMinutes(60))) {
          $killmailDataNew = [];
          $addedCount = $existingCount = 0;     
-         foreach (range(1, 15) as $page) {
+         foreach (range(1, 2) as $page) {
              $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
              if (!$response->successful()) {
                  $message = "Failed to fetch killmails from page {$page}.";
