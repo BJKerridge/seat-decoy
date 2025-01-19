@@ -110,40 +110,40 @@ class CombatController extends Controller
         
         $formattedCharacterList = array_slice($formattedCharacterList, 0, 20);
         
-$killmailDataNew = [];
+// $killmailDataNew = [];
 
-for ($page = 1; $page <= 10; $page++) {
-    $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
-    if ($response->successful()) {
-        $killmails = $response->json();
-        foreach ($killmails as $killmail) {
-            $killmail_id = $killmail['killmail_id'];
-            $killmail_hash = $killmail['zkb']['hash'];
+// for ($page = 1; $page <= 10; $page++) {
+//     $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
+//     if ($response->successful()) {
+//         $killmails = $response->json();
+//         foreach ($killmails as $killmail) {
+//             $killmail_id = $killmail['killmail_id'];
+//             $killmail_hash = $killmail['zkb']['hash'];
 
-            $killmailModel = Killmail::firstOrCreate(
-                ['killmail_id' => $killmail_id], // Unique constraint
-                ['killmail_hash' => $killmail_hash] // Values to insert
-            );
+//             $killmailModel = Killmail::firstOrCreate(
+//                 ['killmail_id' => $killmail_id], // Unique constraint
+//                 ['killmail_hash' => $killmail_hash] // Values to insert
+//             );
 
-            if ($killmailModel->wasRecentlyCreated) {
-                $addedCount++;  // Count if newly created
-            } else {
-                $existingCount++;  // Count if it already existed
-            }
+//             if ($killmailModel->wasRecentlyCreated) {
+//                 $addedCount++;  // Count if newly created
+//             } else {
+//                 $existingCount++;  // Count if it already existed
+//             }
 
-            $killmailDataNew[] = [
-                'killmail_id' => $killmail_id,
-                'killmail_hash' => $killmail_hash,
-            ];
-        }
-        $message = "{$page} pages loaded! {$addedCount} killmails added, {$existingCount} killmails already existed.";
-    } else {
-        $message = "Failed to fetch killmails from page {$page}.";
-        break;
-    }
-}
+//             $killmailDataNew[] = [
+//                 'killmail_id' => $killmail_id,
+//                 'killmail_hash' => $killmail_hash,
+//             ];
+//         }
+//         $message = "{$page} pages loaded! {$addedCount} killmails added, {$existingCount} killmails already existed.";
+//     } else {
+//         $message = "Failed to fetch killmails from page {$page}.";
+//         break;
+//     }
+// }
 
-$killmailDataNew = json_encode($killmailDataNew);
+// $killmailDataNew = json_encode($killmailDataNew);
         
 //         $killmailsCount = Killmail::whereDoesntHave('detail')->count();
 
@@ -165,9 +165,9 @@ $killmailDataNew = json_encode($killmailDataNew);
         $allianceNeutral = [];
         $allianceHostile = [];
         
-        //$allianceFriendly = [99005338, 1727758877, 1042504553, 99012410, 386292982, 99011983, 99011720, 99011279];
-        //$allianceNeutral = [1411711376, 99003581, 99007203, 99012982];
-        //$allianceHostile = [1900696668, 1354830081, 99011223, 99003214, 99009927, 99009163, 99012042, 99011162];
+        $allianceFriendly = [99005338, 1727758877, 1042504553, 99012410, 386292982, 99011983, 99011720, 99011279];
+        $allianceNeutral = [1411711376, 99003581, 99007203, 99012982];
+        $allianceHostile = [1900696668, 1354830081, 99011223, 99003214, 99009927, 99009163, 99012042, 99011162];
         
 
 
@@ -208,6 +208,6 @@ $killmailDataNew = json_encode($killmailDataNew);
         $killmailLedgerNeutral = getKillmailLedger($allianceNeutral);
         $killmailLedgerHostile = getKillmailLedger($allianceHostile);
 
-        return view('decoy::decoyCombat', compact('killmailLedgerFriendly', 'killmailLedgerHostile', 'killmailLedgerNeutral', 'characterList', 'formattedCharacterList', 'killmailDataNew', 'message'))->render();
+        return view('decoy::decoyCombat', compact('killmailLedgerFriendly', 'killmailLedgerHostile', 'killmailLedgerNeutral', 'characterList', 'formattedCharacterList'))->render();
     }
 }
