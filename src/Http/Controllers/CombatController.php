@@ -26,6 +26,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
+use Seat\Eveapi\Models\Killmails\Killmail;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Eveapi\Models\Industry\CharacterMining;
 use Seat\Eveapi\Models\Alliances\Alliance;
@@ -38,6 +39,8 @@ use Seat\Eveapi\Models\Character\CharacterInfo;
 use Seat\Api\Http\Resources\UserResource;
 use Seat\Eveapi\Models\Corporation\CorporationMember;
 use Seat\Eveapi\Models\RefreshToken;
+use Illuminate\Support\Facades\Bus;
+use Seat\Eveapi\Jobs\Killmails\Detail;
 
 
 /**
@@ -61,14 +64,13 @@ class CombatController extends Controller
         $characterList = User::whereIn('main_character_id', $corpPilots)->get(); // Get users
         $userIds = $characterList->pluck('id')->toArray(); // Get user IDs
         $characterIds = RefreshToken::whereIn('user_id', $userIds)->withTrashed()->pluck('character_id');
-        
-        // Get killmails that involve these characters
+        $addedCount = 0;
+        $existingCount = 0;
         $killmailData = KillmailAttacker::whereIn('character_id', $characterIds)
             ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->select('killmail_id', 'character_id')
             ->get();
         
-        // Group by killmail_id for quick lookup
         $killmailCounts = $killmailData->groupBy('killmail_id');
         
         $formattedCharacterList = [];
@@ -80,20 +82,17 @@ class CombatController extends Controller
                 ->toArray();
             
             $distinctKillmailIds = [];
-            $killmailIdsForUser = []; // Reset per user
+            $killmailIdsForUser = [];
         
             foreach ($associatedCharacterIds as $characterId) {
                 foreach ($killmailCounts as $killmailId => $charactersInKillmail) {
                     if ($charactersInKillmail->contains('character_id', $characterId)) {
                         $distinctKillmailIds[$killmailId] = true;
-                        $killmailIdsForUser[$killmailId] = true; // Store killmail IDs per user
+                        $killmailIdsForUser[$killmailId] = true;
                     }
                 }
             }
-        
-            // Count only distinct killmail IDs for this user
             $killmailCount = count($distinctKillmailIds);
-        
             $formattedCharacterList[] = [
                 'id' => $user->id,
                 'main_character_id' => $user->main_character_id,
@@ -111,10 +110,53 @@ class CombatController extends Controller
         
         $formattedCharacterList = array_slice($formattedCharacterList, 0, 20);
         
+$killmailDataNew = [];
 
-        //$formattedCharacterList = json_encode($formattedCharacterList);
+for ($page = 1; $page <= 10; $page++) {
+    $response = Http::get("https://zkillboard.com/api/kills/allianceID/99012410/page/{$page}/");
+    if ($response->successful()) {
+        $killmails = $response->json();
+        foreach ($killmails as $killmail) {
+            $killmail_id = $killmail['killmail_id'];
+            $killmail_hash = $killmail['zkb']['hash'];
 
+            $killmailModel = Killmail::firstOrCreate(
+                ['killmail_id' => $killmail_id], // Unique constraint
+                ['killmail_hash' => $killmail_hash] // Values to insert
+            );
 
+            if ($killmailModel->wasRecentlyCreated) {
+                $addedCount++;  // Count if newly created
+            } else {
+                $existingCount++;  // Count if it already existed
+            }
+
+            $killmailDataNew[] = [
+                'killmail_id' => $killmail_id,
+                'killmail_hash' => $killmail_hash,
+            ];
+        }
+        $message = "{$page} pages loaded! {$addedCount} killmails added, {$existingCount} killmails already existed.";
+    } else {
+        $message = "Failed to fetch killmails from page {$page}.";
+        break;
+    }
+}
+
+$killmailDataNew = json_encode($killmailDataNew);
+        
+//         $killmailsCount = Killmail::whereDoesntHave('detail')->count();
+
+// if ($killmailsCount > 0) {
+//     // Output the quantity of killmails that require details
+//     $message = "There are {$killmailsCount} killmails that require details.";
+// } else {
+//     $message = "There are no killmails requiring details.";
+// }
+
+//25792 at 2025-01-19 00:21
+
+        //$message = "Failed to fetch killmails.";
 
         //$mainCharacterId = 411225042;
 
@@ -123,9 +165,9 @@ class CombatController extends Controller
         $allianceNeutral = [];
         $allianceHostile = [];
         
-        $allianceFriendly = [99005338, 1727758877, 1042504553, 99012410, 386292982, 99011983, 99011720, 99011279];
-        $allianceNeutral = [1411711376, 99003581, 99007203, 99012982];
-        $allianceHostile = [1900696668, 1354830081, 99011223, 99003214, 99009927, 99009163, 99012042, 99011162];
+        //$allianceFriendly = [99005338, 1727758877, 1042504553, 99012410, 386292982, 99011983, 99011720, 99011279];
+        //$allianceNeutral = [1411711376, 99003581, 99007203, 99012982];
+        //$allianceHostile = [1900696668, 1354830081, 99011223, 99003214, 99009927, 99009163, 99012042, 99011162];
         
 
 
@@ -166,6 +208,6 @@ class CombatController extends Controller
         $killmailLedgerNeutral = getKillmailLedger($allianceNeutral);
         $killmailLedgerHostile = getKillmailLedger($allianceHostile);
 
-        return view('decoy::decoyCombat', compact('killmailLedgerFriendly', 'killmailLedgerHostile', 'killmailLedgerNeutral', 'characterList', 'formattedCharacterList', 'killmailData'))->render();
+        return view('decoy::decoyCombat', compact('killmailLedgerFriendly', 'killmailLedgerHostile', 'killmailLedgerNeutral', 'characterList', 'formattedCharacterList', 'killmailDataNew', 'message'))->render();
     }
 }
