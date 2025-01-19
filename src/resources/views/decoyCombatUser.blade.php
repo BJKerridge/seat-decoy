@@ -19,6 +19,19 @@
 .circle-orange { background-color: #ce440f; }
 .circle-red { background-color: #722020; }
 .circle-darkred { background-color:  #8d3264; }
+
+@media (max-width: 768px) {
+    .alliance-col, 
+    .corp-col {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .pilots-col {
+        display: none;
+    }
+}
 </style>
 
 <div class="row">
@@ -65,20 +78,22 @@
                 <div class="card-body" style="line-height: 12px; font-size: 12px;">
                     <h4 class="text-center">Kills</h4>
                     <table class="table table-hover">
-                        <thead><tr>
-                            <th style="width: 120px;">Time</th>
-                            <th style="width: 96px;">System</th>
-                            <th style="width: 32px;">Alliance</th>
-                            <th style="width: 80px;">Corp</th>
-                            <th style="width: 32px;">Ship</th>
-                            <th style="width: 32px;">Value</th>
-                            <th>Pilots</th>
-                        </tr></thead>
+                        <thead>
+                            <tr>
+                                <th class="time-col" style="width: 100px;">Time</th>
+                                <th class="system-col" style="width: 96px;">System</th>
+                                <th class="alliance-col" style="width: 32px;">Alliance</th>
+                                <th class="corp-col" style="width: 32px;">Corp</th>
+                                <th class="ship-col" style="width: 32px;">Ship</th>
+                                <th class="value-col" style="width: 32px;">Value</th>
+                                <th class="pilots-col">Pilots</th>
+                            </tr>
+                        </thead>
                         <tbody>
                         @foreach ($killmailData as $killmail)
                         <tr onclick="window.open('https://zkillboard.com/kill/{{ $killmail['killmail_id'] }}/', '_blank');" style="cursor: pointer;">
-                        <td>{{ $killmail['killmail_time'] }}</td>
-                        <td>{{ $killmail['killmail_location'] }}<br /><div class="circle
+                        <td class="time-col">{{ $killmail['killmail_time'] }}</td>
+                        <td class="system-col">{{ $killmail['killmail_location'] }}<br /><div class="circle
                             @if ($killmail['killmail_location_sec'] >= 0.8)
                                 circle-blue
                             @elseif ($killmail['killmail_location_sec'] >= 0.5)
@@ -93,11 +108,11 @@
                                 circle-darkred
                             @endif
                         "></div> {{ $killmail['killmail_location_sec'] }}</td>
-                        <td><img src="https://images.evetech.net/alliances/{{ $killmail['alliance_id'] }}/logo?size=32" class="img-circle"></td>
-                        <td><img src="https://images.evetech.net/corporations/{{ $killmail['corporation_id'] }}/logo?size=32" class="img-circle"></td>
-                        <td><img src="https://images.evetech.net/types/{{ $killmail['ship_type_id'] }}/render?size=32" class="img-circle elevation-2"></td>
-                        <td> {{ $killmail['kill_value'] }} </td>
-                        <td>@foreach ($killmail['attacker_ids'] as $attacker)
+                        <td class="alliance-col"><img src="https://images.evetech.net/alliances/{{ $killmail['alliance_id'] }}/logo?size=32" class="img-circle"></td>
+                        <td class="corp-col"><img src="https://images.evetech.net/corporations/{{ $killmail['corporation_id'] }}/logo?size=32" class="img-circle"></td>
+                        <td class="ship-col"><img src="https://images.evetech.net/types/{{ $killmail['ship_type_id'] }}/render?size=32" class="img-circle elevation-2"></td>
+                        <td class="value-col"> {{ $killmail['kill_value'] }} </td>
+                        <td class="pilots-col">@foreach ($killmail['attacker_ids'] as $attacker)
                         <span><img src="//images.evetech.net/characters/{{ $attacker['attacker_id'] }}/portrait?size=32" title="{{ $attacker['attacker_name'] }}" class="img-circle"></span>
                         @endforeach</td>
                         </tr>
