@@ -22,6 +22,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace BJK\Decoy\Seat;
 
 use Seat\Services\AbstractSeatPlugin;
+use Illuminate\Console\Scheduling\Schedule;
+use BJK\Decoy\Seat\database\Seeders\ScheduleSeeder;
+use BJK\Decoy\Seat\Commands\ImportZKillDataCommand;
+use BJK\Decoy\Seat\Commands\ImportPilotKillDataCommand;
 
 /**
  * Class DecoyServiceProvider.
@@ -46,6 +50,11 @@ class DecoyServiceProvider extends AbstractSeatPlugin
 
         // Register generic permissions
         $this->registerPermissions(__DIR__ . '/Config/decoyFuel.permissions.php', 'decoy');
+
+        $this->registerDatabaseSeeders(ScheduleSeeder::class);
+
+        $this->commands([ImportZKillDataCommand::class,]);
+        $this->commands([ImportPilotKillDataCommand::class,]);
     }
 
     /**

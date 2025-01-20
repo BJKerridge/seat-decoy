@@ -4,9 +4,7 @@
 @section('page_description', 'Combat Dashboard')
 
 @section('content')
-<script>
-    console.log(@json($message));
-</script>
+
 
 <div class="row"><!-- row -->
     <div class="col-md-12">
