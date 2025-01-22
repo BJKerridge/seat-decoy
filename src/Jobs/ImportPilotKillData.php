@@ -65,7 +65,7 @@ class ImportPilotKillData implements ShouldQueue
             $userIds = $characterList->pluck('id');
         
             foreach ($characterList as $user) {
-                $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->withTrashed()->pluck('character_id');
+                $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->pluck('character_id');
                 
                 // Convert collections to arrays before using array_intersect()
                 $filteredCharacters = array_values(array_intersect($associatedCharacterIds->toArray(), $corpPilots->toArray()));
