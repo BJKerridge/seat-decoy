@@ -63,6 +63,11 @@ class ImportPilotKillData implements ShouldQueue
             $corpPilots = CorporationMember::whereIn('corporation_id', $corpIds)->pluck('character_id');
             $characterList = User::whereIn('main_character_id', $corpPilots)->get();
             $userIds = $characterList->pluck('id');
+
+            //Remove pilots from the table if they are no longer in alliance
+            foreach ($characterList as $user) {
+                DB::table('decoy_combat_users')->whereNotIn('main_character_id', $userIds)->delete();
+            };
         
             foreach ($characterList as $user) {
                 $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->pluck('character_id');
