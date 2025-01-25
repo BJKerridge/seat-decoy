@@ -267,12 +267,16 @@ class ImportUserInfo implements ShouldQueue
                 ->update(['isk_total' => $total_isk]);
             };
 
-        $last30DaysData = DB::table('character_wallet_journals')
-        ->where('date', '>=', Carbon::now()->subDays(30))
-        ->get();
+        // $last30DaysData = DB::table('character_wallet_journals')
+        // ->where('date', '>=', Carbon::now()->subDays(30))
+        // ->get();
 
         foreach ($pilotsToUpdate as $character) {
-            $characterData = $last30DaysData->where('character_id', $character);
+            // $characterData = $last30DaysData;
+            $characterData = DB::table('character_wallet_journals')
+            ->where('character_id', $character)
+            ->where('date', '>=', Carbon::now()->subDays(30))
+            ->get();
             $bounty = $characterData->where('ref_type', 'bounty_prizes')->sum('amount');
             $missions = $characterData->whereIn('ref_type', ['agent_mission_reward', 'agent_mission_time_bonus_reward'])->sum('amount');
             $incursions = $characterData->where('ref_type', 'corporate_reward_payout')->sum('amount');
