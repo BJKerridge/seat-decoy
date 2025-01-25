@@ -25,9 +25,9 @@
 <div class="row">
 
     <!-- Your Kills -->
-    <div class="col-md-3 col-sm-6">
+    <div class="col-md-4 col-sm-6">
       <div class="info-box">
-      <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/characters/411225042/portrait?size=64'></i></span>
+      <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/characters/{{ auth()->user()->main_character_id }}/portrait?size=64'></i></span>
         <div class="info-box-content">
           <span class="info-box-text">Your Kills (all pilots)</span>
           <span class="info-box-number">{{ $mainInfo['kills'] }}</span>
@@ -62,7 +62,7 @@
 <div class="row">
 
     <!-- Decoy Kills -->
-    <div class="col-md-3 col-sm-6">
+    <div class="col-md-4 col-sm-6">
       <div class="info-box">
       <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/alliances/99012410/logo?size=64'></i></span>
         <div class="info-box-content">
@@ -73,36 +73,25 @@
     </div>
 
         <!-- Last Fleet Time -->
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-4 col-sm-6">
       <div class="info-box">
-        <span class="info-box-icon bg-aqua elevation-1"><i class="fa fa-server"></i></span>
+        <span class="info-box-icon bg-aqua elevation-1"><i class="fa fa-calendar"></i></span>
         <div class="info-box-content">
           <span class="info-box-text">Last Fleet Time</span>
           <span class="info-box-number">
-          {{ $lastFleetTime ? \Carbon\Carbon::parse(trim($lastFleetTime, '"'))->format('jS F Y, h:ia') : 'N/A' }}
+          {{ $lastFleetTime === 'N/A' ? 'N/A' : (\Carbon\Carbon::parse(trim($lastFleetTime, '"'))->format('jS F Y, h:ia')) }}
           </span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
     </div>
 
     <!-- Total Fleets -->
-    <div class="col-md-3 col-sm-6">
+    <div class="col-md-4 col-sm-6">
       <div class="info-box">
       <span class="info-box-icon bg-red elevation-1"><i class="fas fa-space-shuttle"></i></span>
           <div class="info-box-content">
-          <span class="info-box-text">Fleet Participation</span>
-          <span class="info-box-number">{{ $mainInfo['uniqueFleets'] }}</span>
-        </div><!-- /.info-box-content -->
-      </div><!-- /.info-box -->
-    </div>
-
-    <!-- Total Fleets, All Accounts -->
-    <div class="col-md-3 col-sm-6">
-      <div class="info-box">
-      <span class="info-box-icon bg-red elevation-1"><i class="fas fa-space-shuttle"></i></span>
-          <div class="info-box-content">
-          <span class="info-box-text">Total HONKERSBONKERS</span>
-          <span class="info-box-number">{{ $mainInfo['totalFleets'] }}</span>
+          <span class="info-box-text">Total Fleets / Honkers Bonkers</span>
+          <span class="info-box-number">{{ $mainInfo['uniqueFleets'] }} / {{ $mainInfo['totalFleets'] }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
     </div>
@@ -288,7 +277,7 @@
   </div>
 </div>
 
-<div class="row">
+<div class="row" {{ !empty($nonDecoy) ? 'extraTable' : 'hidden' }}>
   <div class="card-body table-responsive" style="line-height: 12px; font-size: 12px;">
     <table class="table table-hover table-striped">
       <thead class="thead-light">
