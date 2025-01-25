@@ -66,8 +66,8 @@ class ImportPilotKillData implements ShouldQueue
             DB::table('decoy_combat_users')->whereNotIn('main_character_id', $corpPilots)->delete();
         
             foreach ($characterList as $user) {
-                $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->pluck('character_id');                
-
+                $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->pluck('character_id');
+                
                 // Convert collections to arrays before using array_intersect()
                 $filteredCharacters = array_values(array_intersect($associatedCharacterIds->toArray(), $corpPilots->toArray()));
                 $newAssociatedCharacterIds = json_encode($filteredCharacters);
