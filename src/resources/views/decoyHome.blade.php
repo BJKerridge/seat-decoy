@@ -79,7 +79,7 @@
         <div class="info-box-content">
           <span class="info-box-text">Last Fleet Time</span>
           <span class="info-box-number">
-          {{ $lastFleetTime === 'N/A' ? 'N/A' : (\Carbon\Carbon::parse(trim($lastFleetTime, '"'))->format('jS F Y, h:ia')) }}
+          {{ $lastFleetTime && $lastFleetTime !== 'null' ? \Carbon\Carbon::parse(trim($lastFleetTime, '"'))->format('jS F Y, h:ia') : 'N/A' }}
           </span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->

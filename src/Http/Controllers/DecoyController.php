@@ -638,7 +638,7 @@ foreach ($matchingFleets as $fleet) {
             }
             })
         ->orderby('fleet_time', 'desc')
-        ->value('fleet_time')) ?? 'N/A';
+        ->value('fleet_time'));
 
 
         // $debug = DB::table('decoy_user_dashboard')
