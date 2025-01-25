@@ -41,6 +41,7 @@ class ImportPilotKillData implements ShouldQueue
                 $table->id();
                 $table->string('name');
                 $table->unsignedBigInteger('main_character_id');
+                $table->text('filter')->nullable();
                 $table->json('associated_character_ids');
                 $table->json('killmails')->default(json_encode([]));
                 $table->timestamp('users_updated_at')->nullable();
