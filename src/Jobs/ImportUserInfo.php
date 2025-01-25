@@ -240,11 +240,11 @@ class ImportUserInfo implements ShouldQueue
                     ->select('killmail_id', 'ship_type_id')
                     ->first();
     
-                $shipValue = DB::table('market_prices')->where('type_id', $victimData->ship_type_id)->value('adjusted_price');
+                $shipValue = DB::table('market_prices')->where('type_id', $victimData->ship_type_id)->value('average_price');
                 $shipContentsValue = DB::table('killmail_victim_items')
                 ->join('market_prices', 'killmail_victim_items.item_type_id', '=', 'market_prices.type_id')
                 ->where('killmail_victim_items.killmail_id', $victimData->killmail_id)
-                ->selectRaw('SUM((COALESCE(killmail_victim_items.quantity_destroyed, 0) + COALESCE(killmail_victim_items.quantity_dropped, 0)) * market_prices.adjusted_price) as total_value')
+                ->selectRaw('SUM((COALESCE(killmail_victim_items.quantity_destroyed, 0) + COALESCE(killmail_victim_items.quantity_dropped, 0)) * market_prices.average_price) as total_value')
                 ->value('total_value'); // Fetch the single summed value
                 $killValue = $shipValue + $shipContentsValue + 10000;
                 $total_kill_value = $total_kill_value + $killValue;
@@ -339,7 +339,7 @@ class ImportUserInfo implements ShouldQueue
                     foreach ($materials as $material) {
                         $adjusted_price = DB::table('market_prices')
                             ->where('type_id', $material->materialTypeID)
-                            ->value('adjusted_price');
+                            ->value('average_price');
                         $material_value = $adjusted_price * $material->quantity;
                         $total_value += $material_value;
                     }
@@ -363,13 +363,13 @@ class ImportUserInfo implements ShouldQueue
                 // Query the character_skills table for the specified skill_ids
                 $skills = DB::table('character_skills')
                     ->where('character_id', $character)
-                    ->whereIn('skill_id', [3387, 24625, 2406, 24624, 45748, 45749])
+                    ->whereIn('skill_id', [3387, 24625, 3406, 24624, 45748, 45749])
                     ->pluck('trained_skill_level', 'skill_id');
         
                 // Get the values for each skill_id, defaulting to 0 if not found
                 $mp = $skills[3387] ?? 0;
                 $amp = $skills[24625] ?? 0;
-                $lo = $skills[2406] ?? 0;
+                $lo = $skills[3406] ?? 0;
                 $alp = $skills[24624] ?? 0;
                 $mr = $skills[45748] ?? 0;
                 $amr = $skills[45749] ?? 0;
@@ -452,6 +452,7 @@ class ImportUserInfo implements ShouldQueue
                     
                         // Fetch extractor end time
                         $planet->extractor_end = DB::table('character_planet_pins')
+                            ->where('character_id', $character)
                             ->where('planet_id', $planet->planet_id)
                             ->orderBy('expiry_time', 'desc')
                             ->value('expiry_time');

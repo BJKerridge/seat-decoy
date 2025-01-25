@@ -24,13 +24,13 @@
 @endphp
 <div class="row">
 
-    <!-- Online Users -->
-    <div class="col-md-4 col-sm-6">
+    <!-- Your Kills -->
+    <div class="col-md-3 col-sm-6">
       <div class="info-box">
-        <span class="info-box-icon bg-aqua elevation-1"><i class="fa fa-server"></i></span>
+      <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/characters/411225042/portrait?size=64'></i></span>
         <div class="info-box-content">
-          <span class="info-box-text">Online Players</span>
-          <span class="info-box-number">69,420</span>
+          <span class="info-box-text">Your Kills (all pilots)</span>
+          <span class="info-box-number">{{ $mainInfo['kills'] }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
     </div>
@@ -41,7 +41,7 @@
         <span class="info-box-icon bg-yellow elevation-1"><i class="fa fa-key"></i></span>
         <div class="info-box-content">
           <span class="info-box-text">Linked Characters</span>
-          <span class="info-box-number">21</span>
+          <span class="info-box-number">{{ count(auth()->user()->associatedCharacterIds()) }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
     </div>
@@ -52,7 +52,7 @@
         <span class="info-box-icon bg-green elevation-1"><i class="far fa-money-bill-alt"></i></span>
         <div class="info-box-content">
           <span class="info-box-text">Total Character Isk</span>
-          <span class="info-box-number">2,400,105,870 (you so poor)</span>
+          <span class="info-box-number">{{ number_format($totalIsk, 0, '.', ',') }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
     </div>
@@ -67,43 +67,45 @@
       <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/alliances/99012410/logo?size=64'></i></span>
         <div class="info-box-content">
           <span class="info-box-text">Decoy Kills</span>
-          <span class="info-box-number">455</span>
+          <span class="info-box-number">{{ $decoyKills }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
     </div>
 
-    <!-- Your Kills -->
-    <div class="col-md-3 col-sm-6">
-      <div class="info-box">
-      <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/characters/411225042/portrait?size=64'></i></span>
-        <div class="info-box-content">
-          <span class="info-box-text">Your Kills (all pilots)</span>
-          <span class="info-box-number">155 (Rank #5)</span>
-        </div><!-- /.info-box-content -->
-      </div><!-- /.info-box -->
-    </div>
-
-    <!-- Kill Values -->
+        <!-- Last Fleet Time -->
         <div class="col-md-3 col-sm-6">
       <div class="info-box">
-      <span class="info-box-icon bg-red elevation-1"><i class="fas fa-crosshairs"></i></span>
-      <div class="info-box-content">
-          <span class="info-box-text">Killmail Value</span>
-          <span class="info-box-number">12,148,684,050 (Rank #6)</span>
+        <span class="info-box-icon bg-aqua elevation-1"><i class="fa fa-server"></i></span>
+        <div class="info-box-content">
+          <span class="info-box-text">Last Fleet Time</span>
+          <span class="info-box-number">
+          {{ $lastFleetTime ? \Carbon\Carbon::parse(trim($lastFleetTime, '"'))->format('jS F Y, h:ia') : 'N/A' }}
+          </span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
-    </div> 
+    </div>
 
-    <!-- Total Earnt Ratting -->
+    <!-- Total Fleets -->
     <div class="col-md-3 col-sm-6">
       <div class="info-box">
       <span class="info-box-icon bg-red elevation-1"><i class="fas fa-space-shuttle"></i></span>
           <div class="info-box-content">
           <span class="info-box-text">Fleet Participation</span>
-          <span class="info-box-number">5 (Rank #20)</span>
+          <span class="info-box-number">{{ $mainInfo['uniqueFleets'] }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
-    </div>   
+    </div>
+
+    <!-- Total Fleets, All Accounts -->
+    <div class="col-md-3 col-sm-6">
+      <div class="info-box">
+      <span class="info-box-icon bg-red elevation-1"><i class="fas fa-space-shuttle"></i></span>
+          <div class="info-box-content">
+          <span class="info-box-text">Total HONKERSBONKERS</span>
+          <span class="info-box-number">{{ $mainInfo['totalFleets'] }}</span>
+        </div><!-- /.info-box-content -->
+      </div><!-- /.info-box -->
+    </div>
 
 </div>
 
@@ -194,13 +196,15 @@
 </script>
 
 <div class="row">
-      <button class="btn btn-primary" data-toggle="modal" style="margin-right: 30px;" data-target="#orderModalDecoy">Change DECOY Pilot Order</button>
-      <button class="btn btn-primary" data-toggle="modal" style="margin-right: 30px;" data-target="#orderModalNonDecoy">Change Non-DECOY Pilot Order</button>
-      <button class="btn btn-primary" data-toggle="modal" data-target="#filterModal">Toggle Columns</button>
+  <div class="col-sm-6 d-flex flex-column flex-sm-row">
+      <button class="btn btn-primary mb-2 mb-sm-0 mr-sm-2" data-toggle="modal" data-target="#orderModalDecoy">Change DECOY Pilot Order</button>
+      <button class="btn btn-primary mb-2 mb-sm-0 mr-sm-2" data-toggle="modal" data-target="#orderModalNonDecoy">Change Non-DECOY Pilot Order</button>
+      <button class="btn btn-primary mb-2 mb-sm-0" data-toggle="modal" data-target="#filterModal">Toggle Columns</button>
+  </div>
 </div>
 
 <div class="row">
-  <div class="card-body" style="line-height: 12px; font-size: 12px;">
+  <div class="card-body table-responsive" style="line-height: 12px; font-size: 12px;">
     <table class="table table-hover table-striped">
       <thead class="thead-light">
         <tr class="align-middle-row">
@@ -264,15 +268,14 @@
               @endphp
               @foreach($planets as $planet)
               @php
-                $extractorEnd = \Carbon\Carbon::parse($planet['extractor_end']);
-                $hasPassed = $extractorEnd->isPast();
-                $hoursRemaining = $hasPassed ? 0 : $extractorEnd->diffInHours(\Carbon\Carbon::now());
+                  $extractorEnd = $planet['extractor_end'] ? \Carbon\Carbon::parse($planet['extractor_end']) : null;
+                  $hasPassed = $extractorEnd ? $extractorEnd->isPast() : false;
+                  $hoursRemaining = $extractorEnd ? $extractorEnd->diffInHours(\Carbon\Carbon::now()) : 0;
               @endphp
-              <img src="https://images.evetech.net/types/{{ $planet['image'] }}/icon?size=32" class="img-circle elevation-2" title="{{ $planet['planet_name'] }}&#10;@if ($hasPassed)
-              Requires attention" style="filter: grayscale(100%);" />
-              @else
-              {{ $hoursRemaining }}h hours remaining" />
-              @endif
+              <img src="https://images.evetech.net/types/{{ $planet['image'] }}/icon?size=32" 
+     class="img-circle elevation-2" 
+     title="{{ $planet['planet_name'] }}&#10;@if (!$extractorEnd || $hasPassed) Requires attention @endif" 
+     @if (!$extractorEnd || $hasPassed) style="filter: grayscale(100%);" @endif />
               @endforeach
               @for($i = 0; $i < $missingPlanets; $i++)
               <img src="https://images.evetech.net/types/25236/icon?size=32" class="img-circle elevation-2" title="N/A" style="filter: grayscale(100%);" />
@@ -286,7 +289,7 @@
 </div>
 
 <div class="row">
-  <div class="card-body" style="line-height: 12px; font-size: 12px;">
+  <div class="card-body table-responsive" style="line-height: 12px; font-size: 12px;">
     <table class="table table-hover table-striped">
       <thead class="thead-light">
         <tr class="align-middle-row">
@@ -343,22 +346,21 @@
               <br />{{ $pilot['industry_research_slots'] }}/{{ $pilot['industry_research_slots_total'] }} Res.
               <br />{{ $pilot['industry_reaction_slots'] }}/{{ $pilot['industry_reaction_slots_total'] }} React.</td>
             <td class="column-13">
-              @php
+            @php
                 $planets = json_decode($pilot['planets'], true);
                 $planetsCount = count($planets);
                 $missingPlanets = 6 - $planetsCount;
               @endphp
               @foreach($planets as $planet)
               @php
-                $extractorEnd = \Carbon\Carbon::parse($planet['extractor_end']);
-                $hasPassed = $extractorEnd->isPast();
-                $hoursRemaining = $hasPassed ? 0 : $extractorEnd->diffInHours(\Carbon\Carbon::now());
+                  $extractorEnd = $planet['extractor_end'] ? \Carbon\Carbon::parse($planet['extractor_end']) : null;
+                  $hasPassed = $extractorEnd ? $extractorEnd->isPast() : false;
+                  $hoursRemaining = $extractorEnd ? $extractorEnd->diffInHours(\Carbon\Carbon::now()) : 0;
               @endphp
-              <img src="https://images.evetech.net/types/{{ $planet['image'] }}/icon?size=32" class="img-circle elevation-2" title="{{ $planet['planet_name'] }}&#10;@if ($hasPassed)
-              Requires attention" style="filter: grayscale(100%);" />
-              @else
-              {{ $hoursRemaining }}h hours remaining" />
-              @endif
+              <img src="https://images.evetech.net/types/{{ $planet['image'] }}/icon?size=32" 
+     class="img-circle elevation-2" 
+     title="{{ $planet['planet_name'] }}&#10;@if (!$extractorEnd || $hasPassed) Requires attention @endif" 
+     @if (!$extractorEnd || $hasPassed) style="filter: grayscale(100%);" @endif />
               @endforeach
               @for($i = 0; $i < $missingPlanets; $i++)
               <img src="https://images.evetech.net/types/25236/icon?size=32" class="img-circle elevation-2" title="N/A" style="filter: grayscale(100%);" />
@@ -411,6 +413,7 @@
     </div>
   </div>
 </div>
+
 
 <script>
 // Function to handle up/down button clicks for both modals

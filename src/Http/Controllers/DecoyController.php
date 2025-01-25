@@ -548,20 +548,73 @@ class DecoyController extends Controller
     {
 
         $debug_array = [];
-
-        $debug = 0;
-
+        $debug = auth()->user()->main_character_id;
+        $mainInfo = $debug;
         $pilotsToUpdate = DB::table('decoy_user_dashboard')->pluck('character_id');
-
         $filter = DB::table('decoy_combat_users')
         ->where('main_character_id', auth()->user()->main_character_id)
         ->pluck('filter');
+        $characters = DB::table('refresh_tokens')->where('user_id', auth()->user()->id)->pluck('character_id');
+        $characterId = auth()->user()->main_character_id;
+
+        // Fetch decoy_combat_users data
+        $combatUser = DB::table('decoy_combat_users')
+            ->where('main_character_id', $characterId)
+            ->first();
+
+        $killCount = 0;
+        if ($combatUser && !empty($combatUser->killmails)) {
+            $killmails = json_decode($combatUser->killmails, true);
+            $killCount = count($killmails);
+        }
+
+    // Fetch unique fleet count from decoy_fleets where character appears in fleet_members
+    $uniqueFleets = DB::table('decoy_fleets')
+    ->where(function ($query) use ($characters) {
+        foreach ($characters as $characterId) {
+            $query->orWhereRaw("JSON_CONTAINS(fleet_members, ?, '$')", [json_encode(['character_id' => (int) $characterId])]);
+        }
+    })
+    ->distinct()
+    ->count();
+
+    // Sum of 'fleets' column from decoy_user_dashboard where character is in character_id
+    $matchingFleets = DB::table('decoy_fleets')
+    ->where(function ($query) use ($characters) {
+        foreach ($characters as $characterId) {
+            $query->orWhereRaw("JSON_CONTAINS(fleet_members, ?, '$')", [json_encode(['character_id' => (int) $characterId])]);
+        }
+    })
+    ->pluck('fleet_members'); // Fetch only fleet_members column
+
+$totalFleets = 0;
+
+foreach ($matchingFleets as $fleet) {
+    $members = json_decode($fleet, true); // Decode JSON into an array
+    foreach ($members as $member) {
+        if (in_array($member['character_id'], $characters->toArray())) {
+            $totalFleets++;
+        }
+    }
+}
+
+    $decoyKills = DB::table('decoy_combat_tracker')
+    ->where('alliance_id', 99012410)
+    ->value('killmails');
+
+    // Structure the data as a JSON array
+    $mainInfo = [
+        'kills' => $killCount,
+        'uniqueFleets' => $uniqueFleets,
+        'totalFleets' => $totalFleets,
+    ];
+
+    //$debug = $characters;
+    $debug = json_encode($mainInfo);
+
+
 
         //$this->createFleetTableIfNeeded();
-
-        
-
-        $characters = DB::table('refresh_tokens')->where('user_id', auth()->user()->id)->pluck('character_id');
 
         $decoyPilots = DB::table('decoy_user_dashboard')
         ->whereIn('character_id', $characters)
@@ -575,11 +628,23 @@ class DecoyController extends Controller
         ->orderBy('order', 'asc')
         ->get();
 
+        $totalIsk = $decoyPilots->sum('isk_total'); + $nonDecoyPilots->sum('isk_total');
+
+        $lastFleetTime = json_encode(
+            DB::table('decoy_fleets')
+            ->where(function ($query) use ($characters) {
+            foreach ($characters as $characterId) {
+                $query->orWhereRaw("JSON_CONTAINS(fleet_members, ?, '$')", [json_encode(['character_id' => (int) $characterId])]);
+            }
+            })
+        ->orderby('fleet_time', 'desc')
+        ->value('fleet_time'));
+
 
         // $debug = DB::table('decoy_user_dashboard')
         // ->where('main_character_id', auth()->user()->main_character_id)
         // ->pluck('associated_character_ids');
 
-        return view('decoy::decoyHome', compact('debug', 'decoyPilots', 'nonDecoyPilots', 'filter'))->render();
+        return view('decoy::decoyHome', compact('debug', 'decoyPilots', 'nonDecoyPilots', 'filter', 'mainInfo', 'decoyKills', 'totalIsk', 'lastFleetTime'))->render();
     }
 }
