@@ -26,6 +26,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use BJK\Decoy\Seat\database\Seeders\ScheduleSeeder;
 use BJK\Decoy\Seat\Commands\ImportZKillDataCommand;
 use BJK\Decoy\Seat\Commands\ImportPilotKillDataCommand;
+use BJK\Decoy\Seat\Commands\ImportUserInfoCommand;
 
 /**
  * Class DecoyServiceProvider.
@@ -55,6 +56,7 @@ class DecoyServiceProvider extends AbstractSeatPlugin
 
         $this->commands([ImportZKillDataCommand::class,]);
         $this->commands([ImportPilotKillDataCommand::class,]);
+        $this->commands([ImportUserInfoCommand::class,]);
     }
 
     /**

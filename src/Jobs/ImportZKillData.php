@@ -100,6 +100,6 @@ class ImportZKillData implements ShouldQueue
      */
     public function tags()
     {
-        return ['web', 'zkillboard', 'data-import'];
+        return ['decoy'];
     }
 }

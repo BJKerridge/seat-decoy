@@ -15,4 +15,18 @@ return [
         'route_segment' => 'decoyCombat',
         'route' => 'decoy::decoyCombat',
     ],
+    'decoyFleets' => [
+        'permission' => 'decoy.decoyFleetView',
+        'name' => 'Fleets',
+        'icon' => 'fa fa-space-shuttle',
+        'route_segment' => 'decoyFleets',
+        'route' => 'decoy::decoyFleets',
+    ],
+    'decoyHome' => [
+        'permission' => 'decoy.decoyHomeView',
+        'name' => 'Home',
+        'icon' => 'fa fa-space-shuttle',
+        'route_segment' => 'decoyHome',
+        'route' => 'decoy::decoyHome',
+    ],
 ];

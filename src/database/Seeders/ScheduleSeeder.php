@@ -25,6 +25,7 @@ namespace BJK\Decoy\Seat\database\Seeders;
 use Seat\Services\Seeding\AbstractScheduleSeeder;
 use BJK\Decoy\Seat\Jobs\ImportZKillData;
 use BJK\Decoy\Seat\Jobs\ImportPilotKillData;
+use BJK\Decoy\Seat\Jobs\ImportUserInfo;
 
 /**
  * Class ScheduleSeeder.
@@ -41,17 +42,25 @@ class ScheduleSeeder extends AbstractScheduleSeeder
     public function getSchedules(): array
     {
         return [
-            [   // Horizon Metrics | Every Five Minutes
+            [   // DECOY Update info from zKillboard | Every Five Minutes
                 'command' => 'decoy:zkill-data',
-                'expression' => '*/2 * * * *',
+                'expression' => '*/5 * * * *',
                 'allow_overlap' => false,
                 'allow_maintenance' => false,
                 'ping_before' => null,
                 'ping_after' => null,
             ],
-            [   // Horizon Metrics | Every Five Minutes
+            [   // DECOY Update pilot zkill data from internal tables | Every Five Minutes
                 'command' => 'decoy:pilot-kill-data',
-                'expression' => '*/2 * * * *',
+                'expression' => '*/5 * * * *',
+                'allow_overlap' => false,
+                'allow_maintenance' => false,
+                'ping_before' => null,
+                'ping_after' => null,
+            ],
+            [   // DECOY Update user homepage | Every Thirty Minutes
+                'command' => 'decoy:update-user-homepage',
+                'expression' => '*/30 * * * *',
                 'allow_overlap' => false,
                 'allow_maintenance' => false,
                 'ping_before' => null,

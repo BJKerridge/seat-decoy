@@ -63,10 +63,11 @@ class ImportPilotKillData implements ShouldQueue
             $corpPilots = CorporationMember::whereIn('corporation_id', $corpIds)->pluck('character_id');
             $characterList = User::whereIn('main_character_id', $corpPilots)->get();
             $userIds = $characterList->pluck('id');
+            DB::table('decoy_combat_users')->whereNotIn('main_character_id', $corpPilots)->delete();
         
             foreach ($characterList as $user) {
-                $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->withTrashed()->pluck('character_id');
-                
+                $associatedCharacterIds = RefreshToken::where('user_id', $user->id)->pluck('character_id');                
+
                 // Convert collections to arrays before using array_intersect()
                 $filteredCharacters = array_values(array_intersect($associatedCharacterIds->toArray(), $corpPilots->toArray()));
                 $newAssociatedCharacterIds = json_encode($filteredCharacters);
@@ -143,10 +144,6 @@ class ImportPilotKillData implements ShouldQueue
             );
         }
 
-        // Example: Call an Artisan command (e.g., 'decoy:pilot-kill-data')
-        //Artisan::call('decoy:pilot-kill-data');
-
-
     }
 
     /**
@@ -156,6 +153,6 @@ class ImportPilotKillData implements ShouldQueue
      */
     public function tags()
     {
-        return ['web', 'zkillboard', 'data-import'];
+        return ['decoy'];
     }
 }
