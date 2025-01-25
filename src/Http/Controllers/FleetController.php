@@ -24,6 +24,7 @@ class FleetController extends Controller
      */
     public function getFleets()
     {
+        $this->createFleetTableIfNeeded();
         $fleets = Fleet::orderBy('fleet_time', 'asc')->get();
         $debug = $fleets;
         return view('decoy::decoyFleets', compact('debug', 'fleets'));
