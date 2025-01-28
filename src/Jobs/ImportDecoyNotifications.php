@@ -79,7 +79,7 @@ class ImportDecoyNotifications implements ShouldQueue
 
         $distinctNotifications = DB::table('character_notifications')
         ->whereIn('character_id', $character_list)  // Filtering by character_id in character_list
-        ->where('timestamp', '>', Carbon::now()->subDays(28))  // Filtering by timestamp within the last 14 days
+        ->where('timestamp', '>', Carbon::now()->subHours(4))  // Filtering by timestamp within the last 14 days
         ->whereIn('type', $alertsToCheck)
         ->distinct('notification_id')  // Ensures distinct notification_id values
         ->select('notification_id', 'type', 'timestamp', 'text')  // Selecting the specific columns
