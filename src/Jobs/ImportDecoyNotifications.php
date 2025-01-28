@@ -57,7 +57,7 @@ class ImportDecoyNotifications implements ShouldQueue
         $chosenCharacter = DB::table('refresh_tokens')
         ->whereIn('character_id', $character_list)
         ->where('deleted_at', null)
-        ->orderBy('updated_at', 'desc')
+        ->orderBy('updated_at', 'asc')
         ->value('character_id');
 
         // Call the Artisan command
