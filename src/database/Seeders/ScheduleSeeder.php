@@ -26,6 +26,7 @@ use Seat\Services\Seeding\AbstractScheduleSeeder;
 use BJK\Decoy\Seat\Jobs\ImportZKillData;
 use BJK\Decoy\Seat\Jobs\ImportPilotKillData;
 use BJK\Decoy\Seat\Jobs\ImportUserInfo;
+use BJK\Decoy\Seat\Jobs\ImportDecoyNotifications;
 
 /**
  * Class ScheduleSeeder.
@@ -61,6 +62,14 @@ class ScheduleSeeder extends AbstractScheduleSeeder
             [   // DECOY Update user homepage | Every Thirty Minutes
                 'command' => 'decoy:update-user-homepage',
                 'expression' => '*/30 * * * *',
+                'allow_overlap' => false,
+                'allow_maintenance' => false,
+                'ping_before' => null,
+                'ping_after' => null,
+            ],
+            [   // DECOY Notification Tool | Every Minute
+                'command' => 'decoy:update-notifications',
+                'expression' => '* * * * *',
                 'allow_overlap' => false,
                 'allow_maintenance' => false,
                 'ping_before' => null,

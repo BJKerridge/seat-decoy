@@ -23,13 +23,12 @@
     $nonDecoy = json_decode($nonDecoyPilots, true); // Decode as an associative array
 @endphp
 <div class="row">
-
     <!-- Your Kills -->
     <div class="col-md-4 col-sm-6">
       <div class="info-box">
       <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/characters/{{ auth()->user()->main_character_id }}/portrait?size=64'></i></span>
         <div class="info-box-content">
-          <span class="info-box-text">Your Kills (all pilots)</span>
+          <span class="info-box-text">Your Decoy Kills</span>
           <span class="info-box-number">{{ $mainInfo['kills'] }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
