@@ -67,7 +67,7 @@ class ImportUserInfo implements ShouldQueue
         $fetchAllCorps = AllianceMember::where('alliance_id', 99012410)->pluck('corporation_id');
         $fetchAllCorpPilots = CorporationMember::whereIn('corporation_id', $fetchAllCorps)->pluck('character_id');
         $fetchAllRegisteredMains = User::whereIn('main_character_id', $fetchAllCorpPilots)->get();
-        $fetchAllAssociatedPilots = DB::table('refresh_tokens')->whereIn('user_id', $fetchAllRegisteredMains->pluck('id'))->pluck('character_id');
+        $fetchAllAssociatedPilots = DB::table('refresh_tokens')->whereIn('user_id', $fetchAllRegisteredMains->pluck('id'))->whereNull('deleted_at')->pluck('character_id');
             
         // Insert missing pilots
         foreach ($fetchAllAssociatedPilots as $pilotId) {
