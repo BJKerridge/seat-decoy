@@ -113,14 +113,16 @@ class ImportUserInfo implements ShouldQueue
         // Fetch the home system
         foreach ($pilotsToUpdate as $user) {
             $character = DB::table('character_clones')->where('character_id', $user)->first();
-            if ($character->home_location_type == "station"){
-                $station = DB::table('universe_stations')->where('station_id', $character->home_location_id)->first();
-                $home = $station->name ?? 'N/A';
-            }else{
-                $structure = DB::table('universe_structures')->where('structure_id', $character->home_location_id)->first();
-                $home = $structure->name ?? 'N/A';
-            }        
-            DB::table('decoy_user_dashboard')->where('character_id', $character->character_id)->update(['home' => $home,]);
+            if ($character && $character->home_location_type !== null) {
+                if ($character->home_location_type == "station") {
+                    $station = DB::table('universe_stations')->where('station_id', $character->home_location_id)->first();
+                    $home = $station->name ?? 'N/A';
+                } else {
+                    $structure = DB::table('universe_structures')->where('structure_id', $character->home_location_id)->first();
+                    $home = $structure->name ?? 'N/A';
+                }
+                DB::table('decoy_user_dashboard')->where('character_id', $character->character_id)->update(['home' => $home]);
+            }
         };
 
         //Roman Numeral Function
