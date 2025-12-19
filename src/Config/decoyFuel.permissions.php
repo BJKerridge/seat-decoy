@@ -21,4 +21,9 @@ return [
         'description' => 'Allows you to see the new homepage',
         'division'    => 'industrial',
     ],
+    'decoyMumbleView' => [
+        'label' => 'Connect to Mumble',
+        'description' => 'Connects the user oto Mumble server via in-browser plugin',
+        'division'    => 'industrial',
+    ],
 ];

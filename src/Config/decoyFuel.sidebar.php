@@ -29,4 +29,11 @@ return [
         'route_segment' => 'decoyHome',
         'route' => 'decoy::decoyHome',
     ],
+    'decoyMumble' => [
+        'permission' => 'decoy.decoyMumbleView',
+        'name' => 'Mumble',
+        'icon' => 'fa fa-headset',
+        'route_segment' => 'mumble',
+        'route' => 'decoy::decoyMumble',
+    ],
 ];
