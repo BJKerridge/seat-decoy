@@ -9,18 +9,26 @@ use Carbon\Carbon;
 
 class DecoyNotificationController extends Controller
 {
-    private static $webhookUrl = env('DISCORD_NOTIFICATION_CHANNEL', '');
+    private static function webhookUrl(): string
+    {
+        return env('DISCORD_NOTIFICATION_CHANNEL', '');
+    }
 
     /* ==================================================
            SEND THE NOTIFICATION TO DISCORD
     ================================================== */
     private static function sendToDiscord(array $message)
     {
-        $response = Http::post(self::$webhookUrl, $message);
+        $url = self::webhookUrl();
 
-        return $response->successful()
-            ? redirect()->back()->with('success', 'Message sent to Discord!')
-            : redirect()->back()->with('error', 'Failed to send message.');
+        if (empty($url)) {
+            Log::error('Discord webhook URL is missing');
+            return false;
+        }
+
+        $response = Http::post($url, $message);
+
+        return $response->successful();
     }
 
     private static function formatNotificationMessage($content, $title, $description, $color, $thumbnailUrl = null)
