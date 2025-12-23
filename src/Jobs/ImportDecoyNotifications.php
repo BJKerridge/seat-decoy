@@ -65,6 +65,10 @@ class ImportDecoyNotifications implements ShouldQueue
             'character_id' => $chosenCharacter,
         ]);
 
+        Log::withContext([
+            'character_id' => $chosenCharacter,
+        ]);
+
         $alertsToCheck = [
             'BillPaidCorpAllMsg',
             'StructureLostShields',
@@ -115,9 +119,10 @@ class ImportDecoyNotifications implements ShouldQueue
     /* ==================================================
            SEND THE NOTIFICATION TO DISCORD
     ================================================== */
+    
     private static function sendToDiscord(array $message)
     {
-        $webhookUrl = "https://discord.com/api/webhooks/1333410250346336360/fUZc9H4_Ua9o6d4srw6f5VMPUmUAoQOMNaQEKJVozzn13IBY8mueLv0ukDhGHCfMGz9j";
+        $webhookUrl = env('DISCORD_NOTIFICATION_CHANNEL', '');
         $response = Http::post($webhookUrl, $message);
 
         return $response->successful()
