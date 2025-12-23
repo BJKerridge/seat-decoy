@@ -65,9 +65,8 @@ class ImportDecoyNotifications implements ShouldQueue
             'character_id' => $chosenCharacter,
         ]);
 
-        Log::withContext([
-            'character_id' => $chosenCharacter,
-        ]);
+        Log::withContext(['character_id' => $chosenCharacter]);
+        Log::info("Processing notifications for character.");
 
         $alertsToCheck = [
             'BillPaidCorpAllMsg',
