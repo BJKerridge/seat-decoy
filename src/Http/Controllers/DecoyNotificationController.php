@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class DecoyNotificationController extends Controller
 {
-    private static $webhookUrl = "https://discord.com/api/webhooks/1333410250346336360/fUZc9H4_Ua9o6d4srw6f5VMPUmUAoQOMNaQEKJVozzn13IBY8mueLv0ukDhGHCfMGz9j";
+    private static $webhookUrl = env('DISCORD_NOTIFICATION_CHANNEL', '');
 
     /* ==================================================
            SEND THE NOTIFICATION TO DISCORD

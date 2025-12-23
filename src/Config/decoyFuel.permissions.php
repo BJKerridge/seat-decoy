@@ -23,7 +23,7 @@ return [
     ],
     'decoyMumbleView' => [
         'label' => 'Connect to Mumble',
-        'description' => 'Connects the user oto Mumble server via in-browser plugin',
+        'description' => 'Connects the user to Mumble server via in-browser plugin',
         'division'    => 'industrial',
     ],
 ];
