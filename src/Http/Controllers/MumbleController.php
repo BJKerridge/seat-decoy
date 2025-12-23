@@ -64,8 +64,7 @@ class MumbleController extends Controller
         $characterName = $main ? $main->name : 'Unknown';
         $characterId = $main ? $main->character_id : null;
         $passwordGenerator = Str::random(24); // 12-character random password
-        $discord_channel = env('DISCORD_NOTIFICATION_CHANNEL', 'poop');
         
-        return view('decoy::decoyMumble', compact('characterName', 'characterId', 'ticker', 'passwordGenerator', 'discord_channel'));
+        return view('decoy::decoyMumble', compact('characterName', 'characterId', 'ticker', 'passwordGenerator'));
     }    
 }
