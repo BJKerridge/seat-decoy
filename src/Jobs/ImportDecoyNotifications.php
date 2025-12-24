@@ -121,12 +121,23 @@ class ImportDecoyNotifications implements ShouldQueue
     
     private static function sendToDiscord(array $message)
     {
-        $webhookUrl = env('DISCORD_NOTIFICATION_CHANNEL', '');
-        $response = Http::post($webhookUrl, $message);
+        $webhookUrls = explode(',', env('DISCORD_NOTIFICATION_CHANNEL', ''));
 
-        return $response->successful()
-            ? redirect()->back()->with('success', 'Message sent to Discord!')
-            : redirect()->back()->with('error', 'Failed to send message.');
+        $allSuccessful = true;
+
+        foreach ($webhookUrls as $webhookUrl) {
+            $webhookUrl = trim($webhookUrl);
+            if (!empty($webhookUrl)) {
+                $response = Http::post($webhookUrl, $message);
+                if (!$response->successful()) {
+                    $allSuccessful = false;
+                }
+            }
+        }
+
+        return $allSuccessful
+            ? redirect()->back()->with('success', 'Message sent to all Discord channels!')
+            : redirect()->back()->with('error', 'Failed to send message to one or more channels.');
     }
 
     private static function formatNotificationMessage($content, $title, $description, $color, $thumbnailUrl = null)

@@ -10,9 +10,9 @@ use Carbon\Carbon;
 
 class DecoyNotificationController extends Controller
 {
-    private static function webhookUrl(): string
+    private static function webhookUrls(): array
     {
-        return env('DISCORD_NOTIFICATION_CHANNEL', '');
+        return explode(',', env('DISCORD_NOTIFICATION_CHANNEL', ''));
     }
 
     /* ==================================================
@@ -20,16 +20,24 @@ class DecoyNotificationController extends Controller
     ================================================== */
     private static function sendToDiscord(array $message)
     {
-        $url = self::webhookUrl();
+        $urls = self::webhookUrls();
 
-        if (empty($url)) {
-            Log::error('Discord webhook URL is missing');
+        if (empty($urls)) {
+            Log::error('Discord webhook URLs are missing');
             return false;
         }
 
-        $response = Http::post($url, $message);
+        $allSuccessful = true;
 
-        return $response->successful();
+        foreach ($urls as $url) {
+            $response = Http::post($url, $message);
+            if (!$response->successful()) {
+                $allSuccessful = false;
+                Log::error("Failed to send message to Discord webhook: {$url}");
+            }
+        }
+
+        return $allSuccessful;
     }
 
     private static function formatNotificationMessage($content, $title, $description, $color, $thumbnailUrl = null)
