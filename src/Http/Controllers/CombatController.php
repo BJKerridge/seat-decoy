@@ -66,9 +66,9 @@ class CombatController extends Controller
     /* ==== GET THE FRIENDLY/NEUTRAL/HOSTILE PAGE
      ================================================== */
 
-        $allianceFriendly = [99005338, 1727758877, 1042504553, 99012410, 386292982, 99011983, 99011720, 99011279];
-        $allianceNeutral = [1411711376, 99003581, 99007203, 99012982];
-        $allianceHostile = [1900696668, 1354830081, 99011223, 99003214, 99009927, 99009163, 99012042, 99011162];
+        $allianceFriendly = [99012410, 99012982, 99010468, 431502563, 99012786, 99014203];
+        $allianceNeutral = [1354830081, 1900696668, 99009163, 99011223, 99010735, 99012042, 933731581, 99006941, 99009927];
+        $allianceHostile = [99003581, 99007203, 498125261, 99002685, 1411711376, 99012770, 154104258, 99013981, 99005866, 99013537];
         
         function getKillmailLedger($allianceList) {
             return collect($allianceList)->map(function ($allianceID) {
