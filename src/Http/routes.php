@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 use Seat\Web\Models\User;
 use Seat\Eveapi\Models\Alliances\Alliance;
 use Seat\Web\Models\Squads\SquadMember;
+use Illuminate\Support\Facades\Auth;
+
 
 Route::group([
     'middleware' => ['web', 'auth'],
