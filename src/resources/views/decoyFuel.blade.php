@@ -21,12 +21,15 @@
                <b>14 Days of Fuel or less</b> will highlight the row yellow.<br />
                <b>7 Days of Fuel or less</b> will highlight the row red.<br />
                <br />
-               <b>Ansiblex</b> should aim to have 750,000 units of Liquid Ozone, but double in the critical routes (IAK, 2-K and GN-).<br />
-               <b>Metenox</b> should aim to have 50,000 units of Magmatic Gas.
+               <b>Ansiblex</b> should aim to have 750,000 units of Liquid Ozone.<br />
+               <b>Metenox</b> should aim to have 100,000 units of Magmatic Gas.
                <br />
                <br />
                <b>Starbase Fuel</b> should be 20 days worth (5k for a small, 10k for a medium, 20k for a large)<br />
                <b>Starbase Stront</b> should be full (5k for a small, 10k for a medium, 20k for a large)<br />
+               <br />
+               <br />
+               Refuel blocks with 1/2 a Deluge fuel bay for the Metenox, and a full Deluge fuel bay for the rest.<br />
            </div>
        </div>
        </div>
