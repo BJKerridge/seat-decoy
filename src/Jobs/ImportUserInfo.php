@@ -39,7 +39,7 @@ class ImportUserInfo implements ShouldQueue
                 $table->text('home')->nullable();
                 $table->timestamp('training_until')->nullable();
                 $table->text('training_skills')->nullable();
-                $table->float('standings_angel')->default(0);
+                $table->float('standings_blood')->default(0);
                 $table->float('standings_eden')->default(0);
                 $table->float('standings_trig')->default(0);
                 $table->integer('fleets')->default(0);
@@ -188,14 +188,14 @@ class ImportUserInfo implements ShouldQueue
             ->value('trained_skill_level') ?? 0;
 
             // Extract the standings for each specific `from_id`
-            $standings_angel = $standings[500011] ?? 0;
-            $standings_angel = round($standings_angel + (10 - $standings_angel) * ($skillCheck * 0.04), 2);
+            $standings_blood = $standings[500012] ?? 0;
+            $standings_blood = round($standings_blood + (10 - $standings_blood) * ($skillCheck * 0.04), 2);
             $standings_eden = $standings[500027] ?? 0;
             $standings_trig = $standings[500026] ?? 0;
             
             DB::table('decoy_user_dashboard')
                 ->where('character_id', $character)
-                ->update(['standings_angel' => $standings_angel,
+                ->update(['standings_blood' => $standings_blood,
                         'standings_eden' => $standings_eden,
                         'standings_trig' => $standings_trig]);
         };

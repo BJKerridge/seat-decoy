@@ -28,7 +28,7 @@
       <div class="info-box">
       <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/characters/{{ auth()->user()->main_character_id }}/portrait?size=64'></i></span>
         <div class="info-box-content">
-          <span class="info-box-text">Your Decoy Kills</span>
+          <span class="info-box-text">Your Decoy Kills (30d)</span>
           <span class="info-box-number">{{ $mainInfo['kills'] }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
@@ -65,7 +65,7 @@
       <div class="info-box">
       <span class="info-box-icon elevation-1"><img src ='https://images.evetech.net/alliances/99012410/logo?size=64'></i></span>
         <div class="info-box-content">
-          <span class="info-box-text">Decoy Kills</span>
+          <span class="info-box-text">Decoy Kills (7d)</span>
           <span class="info-box-number">{{ $decoyKills }}</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
@@ -74,11 +74,11 @@
         <!-- Last Fleet Time -->
         <div class="col-md-4 col-sm-6">
       <div class="info-box">
-        <span class="info-box-icon bg-aqua elevation-1"><i class="fa fa-calendar"></i></span>
+        <span class="info-box-icon bg-purple elevation-1"><i class="fa fa-gem"></i></span>
         <div class="info-box-content">
-          <span class="info-box-text">Last Fleet Time</span>
+          <span class="info-box-text">m3 Mined</span>
           <span class="info-box-number">
-          {{ $lastFleetTime && $lastFleetTime !== 'null' ? \Carbon\Carbon::parse(trim($lastFleetTime, '"'))->format('jS F Y, h:ia') : 'N/A' }}
+            Let's remove this
           </span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
@@ -87,10 +87,10 @@
     <!-- Total Fleets -->
     <div class="col-md-4 col-sm-6">
       <div class="info-box">
-      <span class="info-box-icon bg-red elevation-1"><i class="fas fa-space-shuttle"></i></span>
+      <span class="info-box-icon bg-red elevation-1"><i class="fas fa-crosshairs"></i></span>
           <div class="info-box-content">
-          <span class="info-box-text">Total Fleets / Honkers Bonkers</span>
-          <span class="info-box-number">{{ $mainInfo['uniqueFleets'] }} / {{ $mainInfo['totalFleets'] }}</span>
+          <span class="info-box-text">NPC Kills</span>
+          <span class="info-box-number">And This</span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
     </div>
@@ -232,7 +232,7 @@
               </span>
               @endif
             </td>
-            <td class="column-5">{{ $pilot['standings_angel'] }} - Angels
+            <td class="column-5">{{ $pilot['standings_blood'] }} - Blood Raiders
               <br />{{ $pilot['standings_trig'] }} - Trigs
               <br />{{ $pilot['standings_eden'] }} - Eden</td>
             <td class="column-6">{{ $pilot['fleets'] }} Fleets (Rank #69)
@@ -317,7 +317,7 @@
               </span>
               @endif
             </td>
-            <td class="column-5">{{ $pilot['standings_angel'] }} - Angels
+            <td class="column-5">{{ $pilot['standings_blood'] }} - Blood Raiders
               <br />{{ $pilot['standings_trig'] }} - Trigs
               <br />{{ $pilot['standings_eden'] }} - Eden</td>
             <td class="column-6">{{ $pilot['fleets'] }} Fleets (Rank #69)
