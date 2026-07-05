@@ -179,7 +179,7 @@ class ImportUserInfo implements ShouldQueue
         foreach ($pilotsToUpdate as $character) {
             $standings = DB::table('character_standings')
             ->where('character_id', $character)
-            ->whereIn('from_id', [500011, 500027, 500026])
+            ->whereIn('from_id', [500012, 500027, 500026])
             ->pluck('standing', 'from_id');
 
             $skillCheck = DB::table('character_skills')
