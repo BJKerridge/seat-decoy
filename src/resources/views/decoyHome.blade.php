@@ -201,7 +201,7 @@
             <th class="column-2">Sec</th>
             <th class="column-3">Home</th>
             <th class="column-4">Skills</th>
-            <th class="column-5">Standings</th>
+            <th class="column-5">Blood Standings</th>
             <th class="column-6">PvP</th>
             <th class="column-7">Total Isk</th>
             <th class="column-9">Isk Income (30d)</th>
@@ -232,9 +232,7 @@
               </span>
               @endif
             </td>
-            <td class="column-5">{{ $pilot['standings_blood'] }} - Blood Raiders
-              <br />{{ $pilot['standings_trig'] }} - Trigs
-              <br />{{ $pilot['standings_eden'] }} - Eden</td>
+            <td class="column-5">{{ $pilot['standings_blood'] }}</td>
             <td class="column-6">{{ $pilot['fleets'] }} Fleets (Rank #69)
               <br />{{ $pilot['killmails'] }} Killmails (Rank #4)
               <br />{{ number_format($pilot['kill_value'], 2) }} ISK Destroyed</td>
@@ -286,7 +284,7 @@
             <th class="column-2">Sec</th>
             <th class="column-3">Home</th>
             <th class="column-4">Skills</th>
-            <th class="column-5">Standings</th>
+            <th class="column-5">Blood Standings</th>
             <th class="column-6">PvP</th>
             <th class="column-7">Total Isk</th>
             <th class="column-9">Isk Income (30d)</th>
@@ -317,9 +315,7 @@
               </span>
               @endif
             </td>
-            <td class="column-5">{{ $pilot['standings_blood'] }} - Blood Raiders
-              <br />{{ $pilot['standings_trig'] }} - Trigs
-              <br />{{ $pilot['standings_eden'] }} - Eden</td>
+            <td class="column-5">{{ $pilot['standings_blood'] }}</td>
             <td class="column-6">{{ $pilot['fleets'] }} Fleets (Rank #69)
               <br />{{ $pilot['killmails'] }} Killmails (Rank #4)
               <br />{{ number_format($pilot['kill_value'], 2) }} ISK Destroyed</td>
