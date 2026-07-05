@@ -191,6 +191,7 @@ class ImportUserInfo implements ShouldQueue
             $standings_blood = $standings[500012] ?? 0;
             $standings_blood = round($standings_blood + (10 - $standings_blood) * ($skillCheck * 0.04), 2);
             $standings_blood_corp = $standings[1000134] ?? 0;
+            $standings_blood_corp = round($standings_blood_corp + (10 - $standings_blood_corp) * ($skillCheck * 0.04), 2);
             $standings_trig = $standings[500026] ?? 0;
             
             DB::table('decoy_user_dashboard')
