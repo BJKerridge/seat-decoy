@@ -232,7 +232,8 @@
               </span>
               @endif
             </td>
-            <td class="column-5">{{ $pilot['standings_blood'] }}</td>
+            <td class="column-5">{{ $pilot['standings_blood'] }} - Alliance<br />
+          {{ $pilot['standings_blood_corp'] }} - Mission Corp</td>
             <td class="column-6">{{ $pilot['fleets'] }} Fleets (Rank #69)
               <br />{{ $pilot['killmails'] }} Killmails (Rank #4)
               <br />{{ number_format($pilot['kill_value'], 2) }} ISK Destroyed</td>
@@ -315,7 +316,8 @@
               </span>
               @endif
             </td>
-            <td class="column-5">{{ $pilot['standings_blood'] }}</td>
+            <td class="column-5">{{ $pilot['standings_blood'] }} - Alliance<br />
+            {{ $pilot['standings_blood_corp'] }} - Mission Corp</td>
             <td class="column-6">{{ $pilot['fleets'] }} Fleets (Rank #69)
               <br />{{ $pilot['killmails'] }} Killmails (Rank #4)
               <br />{{ number_format($pilot['kill_value'], 2) }} ISK Destroyed</td>

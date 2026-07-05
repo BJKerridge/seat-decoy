@@ -40,7 +40,7 @@ class ImportUserInfo implements ShouldQueue
                 $table->timestamp('training_until')->nullable();
                 $table->text('training_skills')->nullable();
                 $table->float('standings_blood')->default(0);
-                $table->float('standings_eden')->default(0);
+                $table->float('standings_blood_corp')->default(0);
                 $table->float('standings_trig')->default(0);
                 $table->integer('fleets')->default(0);
                 $table->double('killmails')->default(0);
@@ -179,7 +179,7 @@ class ImportUserInfo implements ShouldQueue
         foreach ($pilotsToUpdate as $character) {
             $standings = DB::table('character_standings')
             ->where('character_id', $character)
-            ->whereIn('from_id', [500012, 500027, 500026])
+            ->whereIn('from_id', [500012, 1000134, 500026])
             ->pluck('standing', 'from_id');
 
             $skillCheck = DB::table('character_skills')
@@ -190,13 +190,13 @@ class ImportUserInfo implements ShouldQueue
             // Extract the standings for each specific `from_id`
             $standings_blood = $standings[500012] ?? 0;
             $standings_blood = round($standings_blood + (10 - $standings_blood) * ($skillCheck * 0.04), 2);
-            $standings_eden = $standings[500027] ?? 0;
+            $standings_blood_corp = $standings[1000134] ?? 0;
             $standings_trig = $standings[500026] ?? 0;
             
             DB::table('decoy_user_dashboard')
                 ->where('character_id', $character)
                 ->update(['standings_blood' => $standings_blood,
-                        'standings_eden' => $standings_eden,
+                        'standings_blood_corp' => $standings_blood_corp,
                         'standings_trig' => $standings_trig]);
         };
 
