@@ -26,391 +26,449 @@ class ImportUserInfo implements ShouldQueue
      * @return void
      */
     public function handle()
-{
-    if (!Schema::hasTable('decoy_user_dashboard')) {
-        Schema::create('decoy_user_dashboard', function (Blueprint $table) {
-            $table->id();
-            $table->integer('character_id');
-            $table->integer('order')->default(0);
-            $table->integer('decoy')->default(0);
-            $table->text('filter')->nullable();
-            $table->text('name')->nullable();
-            $table->float('sec')->default(0);
-            $table->text('home')->nullable();
-            $table->timestamp('training_until')->nullable();
-            $table->text('training_skills')->nullable();
-            $table->float('standings_blood')->default(0);
-            $table->float('standings_eden')->default(0);
-            $table->float('standings_trig')->default(0);
-            $table->integer('fleets')->default(0);
-            $table->double('killmails')->default(0);
-            $table->double('kill_value')->default(0);
-            $table->double('isk_total')->default(0);
-            $table->double('isk_market')->default(0);
-            $table->double('isk_ratting')->default(0);
-            $table->double('isk_incursions')->default(0);
-            $table->double('isk_missions')->default(0);
-            $table->double('mining_value')->default(0);
-            $table->double('mining_m3')->default(0);
-            $table->integer('industry_manufacturing_slots')->default(0);
-            $table->integer('industry_manufacturing_slots_total')->default(0);
-            $table->integer('industry_research_slots')->default(0);
-            $table->integer('industry_research_slots_total')->default(0);
-            $table->integer('industry_reaction_slots')->default(0);
-            $table->integer('industry_reaction_slots_total')->default(0);
-            $table->json('planets')->nullable();
-            $table->timestamps();
-        });
-    }
+    {
+        if (!Schema::hasTable('decoy_user_dashboard')) {
+            Schema::create('decoy_user_dashboard', function (Blueprint $table) {
+                $table->id();
+                $table->integer('character_id');
+                $table->integer('order')->default(0);
+                $table->integer('decoy')->default(0);
+                $table->text('filter')->nullable();
+                $table->text('name')->nullable();
+                $table->float('sec')->default(0);
+                $table->text('home')->nullable();
+                $table->timestamp('training_until')->nullable();
+                $table->text('training_skills')->nullable();
+                $table->float('standings_blood')->default(0);
+                $table->float('standings_eden')->default(0);
+                $table->float('standings_trig')->default(0);
+                $table->integer('fleets')->default(0);
+                $table->double('killmails')->default(0);
+                $table->double('kill_value')->default(0);
+                $table->double('isk_total')->default(0);
+                $table->double('isk_market')->default(0);
+                $table->double('isk_ratting')->default(0);
+                $table->double('isk_incursions')->default(0);
+                $table->double('isk_missions')->default(0);
+                $table->double('mining_value')->default(0);
+                $table->integer('mining_m3')->default(0);
+                $table->integer('industry_manufacturing_slots')->default(0);
+                $table->integer('industry_manufacturing_slots_total')->default(0);
+                $table->integer('industry_research_slots')->default(0);
+                $table->integer('industry_research_slots_total')->default(0);
+                $table->integer('industry_reaction_slots')->default(0);
+                $table->integer('industry_reaction_slots_total')->default(0);
+                $table->json('planets')->nullable();
+                $table->timestamps();
+            });
+        }
+    
+        //Populate table with the character list
+        $fetchAllCorps = AllianceMember::where('alliance_id', 99012410)->pluck('corporation_id');
+        $fetchAllCorpPilots = CorporationMember::whereIn('corporation_id', $fetchAllCorps)->pluck('character_id');
+        $fetchAllRegisteredMains = User::whereIn('main_character_id', $fetchAllCorpPilots)->get();
+        $fetchAllAssociatedPilots = DB::table('refresh_tokens')->whereIn('user_id', $fetchAllRegisteredMains->pluck('id'))->whereNull('deleted_at')->pluck('character_id');
+            
+        // Insert missing pilots
+        foreach ($fetchAllAssociatedPilots as $pilotId) {
+            $exists = DB::table('decoy_user_dashboard')->where('character_id', $pilotId)->exists();
+            $characterInfo = DB::table('character_infos')->where('character_id', $pilotId)->first();
+            
+            if (!$exists && $characterInfo && $characterInfo->name) {
+                DB::table('decoy_user_dashboard')->insert([
+                    'character_id' => $pilotId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
 
-    // 1. Resolve Sync Rosters
-    $fetchAllCorps = AllianceMember::where('alliance_id', 99012410)->pluck('corporation_id');
-    $fetchAllCorpPilots = CorporationMember::whereIn('corporation_id', $fetchAllCorps)->pluck('character_id')->toArray();
-    $fetchAllRegisteredMains = User::whereIn('main_character_id', $fetchAllCorpPilots)->get();
-    $fetchAllAssociatedPilots = DB::table('refresh_tokens')
-        ->whereIn('user_id', $fetchAllRegisteredMains->pluck('id'))
-        ->whereNull('deleted_at')
-        ->pluck('character_id')
-        ->toArray();
+        // Delete pilots that don't exist in fetchAllAssociatedPilots
+        DB::table('decoy_user_dashboard')
+            ->whereNotIn('character_id', $fetchAllAssociatedPilots)
+            ->delete();
 
-    // Sync pilots in target table
-    $existingDashboardPilots = DB::table('decoy_user_dashboard')->pluck('character_id')->toArray();
-    $missingPilots = array_diff($fetchAllAssociatedPilots, $existingDashboardPilots);
+        $pilotsToUpdate = DB::table('decoy_user_dashboard')->pluck('character_id');
 
-    if (!empty($missingPilots)) {
-        $validCharacters = DB::table('character_infos')
-            ->whereIn('character_id', $missingPilots)
-            ->whereNotNull('name')
-            ->pluck('character_id');
+        // Update 'decoy' value for each pilot in fetchAllCorpPilots that exists in decoy_user_dashboard
+        foreach ($fetchAllCorpPilots as $pilotId) {
+            DB::table('decoy_user_dashboard')
+                ->where('character_id', $pilotId)
+                ->update(['decoy' => 1]);
+        }
 
-        $inserts = [];
-        foreach ($validCharacters as $pilotId) {
-            $inserts[] = [
-                'character_id' => $pilotId,
-                'created_at' => now(),
-                'updated_at' => now(),
+        // Fetch the name and security status
+        foreach ($pilotsToUpdate as $user) {
+            $character = DB::table('character_infos')->where('character_id', $user)->first();
+            if ($character) {
+                DB::table('decoy_user_dashboard')
+                    ->where('character_id', $character->character_id)
+                    ->update([
+                        'name' => $character->name,
+                        'sec' => $character->security_status,
+                    ]);
+            }
+        }
+
+        // Fetch the home system
+        foreach ($pilotsToUpdate as $user) {
+            $character = DB::table('character_clones')->where('character_id', $user)->first();
+            if ($character && $character->home_location_type !== null) {
+                if ($character->home_location_type == "station") {
+                    $station = DB::table('universe_stations')->where('station_id', $character->home_location_id)->first();
+                    $home = $station->name ?? 'N/A';
+                } else {
+                    $structure = DB::table('universe_structures')->where('structure_id', $character->home_location_id)->first();
+                    $home = $structure->name ?? 'N/A';
+                }
+                DB::table('decoy_user_dashboard')->where('character_id', $character->character_id)->update(['home' => $home]);
+            }
+        };
+
+        //Roman Numeral Function
+        function toRoman($number) {
+            $map = [
+                1 => 'I',
+                2 => 'II',
+                3 => 'III',
+                4 => 'IV',
+                5 => 'V'
             ];
+            return $map[$number] ?? '';
         }
-        if (!empty($inserts)) {
-            DB::table('decoy_user_dashboard')->insert($inserts);
-        }
-    }
 
-    DB::table('decoy_user_dashboard')->whereNotIn('character_id', $fetchAllAssociatedPilots)->delete();
+        // Select the skill in training and the finish date
+        foreach ($pilotsToUpdate as $character_id) {
+            $skills_finish = DB::table('character_skill_queues')
+            ->where('character_id', $character_id)
+            ->max('finish_date');
 
-    // Reset decoy flags and set active ones in bulk
-    DB::table('decoy_user_dashboard')->update(['decoy' => 0]);
-    DB::table('decoy_user_dashboard')->whereIn('character_id', $fetchAllCorpPilots)->update(['decoy' => 1]);
-
-    $pilotsToUpdate = DB::table('decoy_user_dashboard')->pluck('character_id')->toArray();
-    if (empty($pilotsToUpdate)) {
-        return;
-    }
-
-    // 2. Eager-Load Large Aggregates Upfront
-    $characterInfos = DB::table('character_infos')->whereIn('character_id', $pilotsToUpdate)->get()->keyBy('character_id');
-    $characterClones = DB::table('character_clones')->whereIn('character_id', $pilotsToUpdate)->get()->keyBy('character_id');
-
-    $stationIds = $characterClones->where('home_location_type', 'station')->pluck('home_location_id')->unique();
-    $structureIds = $characterClones->where('home_location_type', 'structure')->pluck('home_location_id')->unique();
-    $stations = DB::table('universe_stations')->whereIn('station_id', $stationIds)->pluck('name', 'station_id');
-    $structures = DB::table('universe_structures')->whereIn('structure_id', $structureIds)->pluck('name', 'structure_id');
-
-    $allSkillQueues = DB::table('character_skill_queues')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->orderBy('queue_position', 'asc')
-        ->get()
-        ->groupBy('character_id');
-
-    $invTypesNames = DB::table('invTypes')
-        ->whereIn('typeID', $allSkillQueues->flatten()->pluck('skill_id')->unique())
-        ->pluck('typeName', 'typeID');
-
-    // Fix: standings_blood reads from_id 500012, so fetch 500012 here (was 500011)
-    $allStandings = DB::table('character_standings')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->whereIn('from_id', [500012, 500027, 500026])
-        ->get()
-        ->groupBy('character_id');
-
-    $allSkillChecks = DB::table('character_skills')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->where('skill_id', 3361)
-        ->pluck('trained_skill_level', 'character_id');
-
-    $allWalletBalances = DB::table('character_wallet_balances')->whereIn('character_id', $pilotsToUpdate)->pluck('balance', 'character_id');
-
-    $allWalletJournals = DB::table('character_wallet_journals')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->where('date', '>=', Carbon::now()->subDays(30))
-        ->get()
-        ->groupBy('character_id');
-
-    $allOrders = DB::table('character_orders')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->where('state', 'active')
-        ->whereNull('is_buy_order')
-        ->get()
-        ->groupBy('character_id');
-
-    $allMiningData = DB::table('character_minings')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->where('date', '>=', Carbon::now()->subDays(30))
-        ->get()
-        ->groupBy('character_id');
-
-    $allIndustrySlots = DB::table('character_skills')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->whereIn('skill_id', [3387, 24625, 3406, 24624, 45748, 45749])
-        ->get()
-        ->groupBy('character_id');
-
-    $allActiveIndyJobs = DB::table('character_industry_jobs')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->where('status', 'active')
-        ->get()
-        ->groupBy('character_id');
-
-    $allPlanets = DB::table('character_planets')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->orderBy('planet_id', 'asc')
-        ->get()
-        ->groupBy('character_id');
-
-    $planetNames = DB::table('planets')->whereIn('planet_id', $allPlanets->flatten()->pluck('planet_id')->unique())->pluck('name', 'planet_id');
-    $planetPins = DB::table('character_planet_pins')
-        ->whereIn('character_id', $pilotsToUpdate)
-        ->orderBy('expiry_time', 'desc')
-        ->get()
-        ->groupBy(function ($item) { return $item->character_id . '-' . $item->planet_id; });
-
-    // 3. Eager-Load Complex Join Aggregates (Killmails)
-    $killmailCounts = DB::table('killmail_details')
-        ->join('killmail_attackers', 'killmail_details.killmail_id', '=', 'killmail_attackers.killmail_id')
-        ->whereIn('killmail_attackers.character_id', $pilotsToUpdate)
-        ->where('killmail_details.killmail_time', '>=', Carbon::now()->subDays(30))
-        ->groupBy('killmail_attackers.character_id')
-        ->select('killmail_attackers.character_id', DB::raw('COUNT(DISTINCT killmail_details.killmail_id) as total'))
-        ->pluck('total', 'character_id');
-
-    $rawKillmailItems = DB::table('killmail_details')
-        ->join('killmail_attackers', 'killmail_details.killmail_id', '=', 'killmail_attackers.killmail_id')
-        ->join('killmail_victims', 'killmail_details.killmail_id', '=', 'killmail_victims.killmail_id')
-        ->leftJoin('killmail_victim_items', 'killmail_details.killmail_id', '=', 'killmail_victim_items.killmail_id')
-        ->whereIn('killmail_attackers.character_id', $pilotsToUpdate)
-        ->where('killmail_details.killmail_time', '>=', Carbon::now()->subDays(30))
-        ->select(
-            'killmail_attackers.character_id',
-            'killmail_details.killmail_id',
-            'killmail_victims.ship_type_id',
-            'killmail_victim_items.item_type_id',
-            'killmail_victim_items.quantity_destroyed',
-            'killmail_victim_items.quantity_dropped'
-        )->get()->groupBy('character_id');
-
-    // Fix: fleet membership counted in one pass instead of one query per pilot
-    $allFleetMembers = DB::table('decoy_fleets')->pluck('fleet_members');
-    $fleetCounts = array_fill_keys($pilotsToUpdate, 0);
-    foreach ($allFleetMembers as $membersJson) {
-        $members = json_decode($membersJson, true) ?? [];
-        foreach ($members as $member) {
-            $cid = $member['character_id'] ?? null;
-            if ($cid !== null && isset($fleetCounts[$cid])) {
-                $fleetCounts[$cid]++;
+            // If there are no rows, set $skills_finish to null
+            if (!$skills_finish) {
+                $skills_finish = null;
             }
-        }
-    }
 
-    // Fix: only load the reference-price/material data actually needed this run,
-    // instead of pulling entire SDE tables (invTypes / invTypeMaterials / market_prices
-    // can run into tens of thousands of rows).
-    $miningTypeIds = $allMiningData->flatten()->pluck('type_id')->unique();
+            $skills = DB::table('character_skill_queues')
+            ->where('character_id', $character_id)
+            ->orderBy('queue_position', 'asc')
+            ->get(['skill_id', 'finished_level']);
 
-    $invTypesVolume = DB::table('invTypes')->whereIn('typeID', $miningTypeIds)->pluck('volume', 'typeID');
+            // Initialize the skill_names array
+            $skill_names = [];
 
-    $invTypeMaterials = DB::table('invTypeMaterials')
-        ->whereIn('typeID', $miningTypeIds)
-        ->get()
-        ->groupBy('typeID');
+            // Fetch the skill names and store them in the skill_names array
+            foreach ($skills as $skill) {
+                $skill_name = DB::table('invTypes')
+                    ->where('typeId', $skill->skill_id)
+                    ->value('typeName'); // Use value instead of pluck
 
-    $killmailShipTypeIds = $rawKillmailItems->flatten()->pluck('ship_type_id')->filter()->unique();
-    $killmailItemTypeIds = $rawKillmailItems->flatten()->pluck('item_type_id')->filter()->unique();
-    $materialTypeIds = $invTypeMaterials->flatten()->pluck('materialTypeID')->filter()->unique();
-
-    $neededPriceTypeIds = $killmailShipTypeIds
-        ->merge($killmailItemTypeIds)
-        ->merge($materialTypeIds)
-        ->unique();
-
-    $marketPrices = DB::table('market_prices')->whereIn('type_id', $neededPriceTypeIds)->pluck('average_price', 'type_id');
-
-    // Helper for skill queue level -> roman numeral
-    $toRoman = function ($number) {
-        return [1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V'][$number] ?? '';
-    };
-
-    // 4. The Consolidated Loop (builds rows in memory, no per-pilot writes)
-    $rows = [];
-
-    foreach ($pilotsToUpdate as $characterId) {
-        $updatePayload = ['character_id' => $characterId];
-
-        // Identity & Security
-        if ($info = $characterInfos->get($characterId)) {
-            $updatePayload['name'] = $info->name;
-            $updatePayload['sec'] = $info->security_status;
-        }
-
-        // Home Clone Location
-        if ($clone = $characterClones->get($characterId)) {
-            if ($clone->home_location_type === 'station') {
-                $updatePayload['home'] = $stations->get($clone->home_location_id, 'N/A');
-            } else {
-                $updatePayload['home'] = $structures->get($clone->home_location_id, 'N/A');
+                if ($skill_name) {
+                    $skill_names[] = $skill_name . ' ' . toRoman($skill->finished_level);
+                }
             }
-        }
 
-        // Skills in Training
-        $skills = $allSkillQueues->get($characterId, collect());
-        $updatePayload['training_until'] = $skills->max('finish_date') ?: null;
+            // Convert the skill_names array to JSON
+            $skill_names_json = json_encode($skill_names);
 
-        $skillNames = [];
-        foreach ($skills as $skill) {
-            if ($name = $invTypesNames->get($skill->skill_id)) {
-                $skillNames[] = $name . ' ' . $toRoman($skill->finished_level);
+            DB::table('decoy_user_dashboard')
+            ->where('character_id', $character_id)
+            ->update(['training_skills' => $skill_names_json, 'training_until' => $skills_finish]);
+        };
+
+        // Fetch Angel/Eden/Trig standings
+        foreach ($pilotsToUpdate as $character) {
+            $standings = DB::table('character_standings')
+            ->where('character_id', $character)
+            ->whereIn('from_id', [500012, 500027, 500026])
+            ->pluck('standing', 'from_id');
+
+            $skillCheck = DB::table('character_skills')
+            ->where('character_id', $character)
+            ->where('skill_id', 3361)
+            ->value('trained_skill_level') ?? 0;
+
+            // Extract the standings for each specific `from_id`
+            $standings_blood = $standings[500012] ?? 0;
+            $standings_blood = round($standings_blood + (10 - $standings_blood) * ($skillCheck * 0.04), 2);
+            $standings_eden = $standings[500027] ?? 0;
+            $standings_trig = $standings[500026] ?? 0;
+            
+            DB::table('decoy_user_dashboard')
+                ->where('character_id', $character)
+                ->update(['standings_blood' => $standings_blood,
+                        'standings_eden' => $standings_eden,
+                        'standings_trig' => $standings_trig]);
+        };
+
+        // Fetch the number of fleets
+        foreach ($pilotsToUpdate as $character) {
+            $fleet_count = DB::table('decoy_fleets')
+            ->whereRaw('json_contains(fleet_members, \'{"character_id": ' . $character . '}\')')
+            ->count();
+            
+            DB::table('decoy_user_dashboard')
+                ->where('character_id', $character)
+                ->update(['fleets' => $fleet_count]);
+        };
+
+        // Fetch the number of killmails per pilot
+        foreach ($pilotsToUpdate as $character) {
+            $kill_count = DB::table('killmail_details')
+            ->join('killmail_attackers', 'killmail_details.killmail_id', '=', 'killmail_attackers.killmail_id')
+            ->where('killmail_attackers.character_id', $character)
+            ->where('killmail_details.killmail_time', '>=', Carbon::now()->subDays(30))
+            ->distinct()
+            ->count('killmail_details.killmail_id');
+            
+            DB::table('decoy_user_dashboard')
+                ->where('character_id', $character)
+                ->update(['killmails' => $kill_count]);
+        };
+
+        // Fetch the total kill value per pilot
+        foreach ($pilotsToUpdate as $character) {
+            $total_kill_value = 0;
+            $killmailIds = DB::table('killmail_details')
+            ->join('killmail_attackers', 'killmail_details.killmail_id', '=', 'killmail_attackers.killmail_id')
+            ->where('killmail_attackers.character_id', $character)
+            ->where('killmail_details.killmail_time', '>=', Carbon::now()->subDays(30))
+            ->distinct()
+            ->pluck('killmail_details.killmail_id')
+            ->toArray();
+
+            foreach ($killmailIds as $killmailId) {
+                $victimData = DB::table('killmail_victims')
+                    ->where('killmail_id', $killmailId)
+                    ->select('killmail_id', 'ship_type_id')
+                    ->first();
+    
+                $shipValue = DB::table('market_prices')->where('type_id', $victimData->ship_type_id)->value('average_price');
+                $shipContentsValue = DB::table('killmail_victim_items')
+                ->join('market_prices', 'killmail_victim_items.item_type_id', '=', 'market_prices.type_id')
+                ->where('killmail_victim_items.killmail_id', $victimData->killmail_id)
+                ->selectRaw('SUM((COALESCE(killmail_victim_items.quantity_destroyed, 0) + COALESCE(killmail_victim_items.quantity_dropped, 0)) * market_prices.average_price) as total_value')
+                ->value('total_value'); // Fetch the single summed value
+                $killValue = $shipValue + $shipContentsValue + 10000;
+                $total_kill_value = $total_kill_value + $killValue;
+            };
+
+            DB::table('decoy_user_dashboard')
+            ->where('character_id', $character)
+            ->update(['kill_value' => $total_kill_value]);
+
+            };
+
+        // Fetch the total ISK per pilot
+        foreach ($pilotsToUpdate as $character) {
+            $total_isk = DB::table('character_wallet_balances')
+            ->where('character_id', $character)
+            ->value('balance') ?? 0;
+            
+            DB::table('decoy_user_dashboard')
+                ->where('character_id', $character)
+                ->update(['isk_total' => $total_isk]);
+            };
+
+        // $last30DaysData = DB::table('character_wallet_journals')
+        // ->where('date', '>=', Carbon::now()->subDays(30))
+        // ->get();
+
+        foreach ($pilotsToUpdate as $character) {
+            // $characterData = $last30DaysData;
+            $characterData = DB::table('character_wallet_journals')
+            ->where('character_id', $character)
+            ->where('date', '>=', Carbon::now()->subDays(30))
+            ->get();
+            $bounty = $characterData->where('ref_type', 'bounty_prizes')->sum('amount');
+            $missions = $characterData->whereIn('ref_type', ['agent_mission_reward', 'agent_mission_time_bonus_reward'])->sum('amount');
+            $incursions = $characterData->where('ref_type', 'corporate_reward_payout')->sum('amount');
+
+            DB::table('decoy_user_dashboard')
+                ->where('character_id', $character)
+                ->update(['isk_ratting' => $bounty,
+                        'isk_missions' => $missions,
+                        'isk_incursions' => $incursions]);
+            };
+
+            // Fetch the market amount per pilot
+            foreach ($pilotsToUpdate as $character) {
+                $market_value = 0; // Initialize market value for each character
+        
+                // Query the character_orders table
+                $orders = DB::table('character_orders')
+                    ->where('character_id', $character)
+                    ->where('state', '=', 'active')
+                    ->whereNull('is_buy_order')
+                    ->get(['volume_remain', 'price']);
+        
+                // Loop through the results and calculate the market value
+                foreach ($orders as $order) {
+                    $market_value += $order->volume_remain * $order->price;
+                }
+    
+                DB::table('decoy_user_dashboard')
+                    ->where('character_id', $character)
+                    ->update(['isk_market' => $market_value]);
+    
             }
-        }
-        $updatePayload['training_skills'] = json_encode($skillNames);
 
-        // Standings
-        $standings = $allStandings->get($characterId, collect())->pluck('standing', 'from_id');
-        $skillCheck = $allSkillChecks->get($characterId, 0);
-        $standingsBlood = $standings->get(500012, 0);
 
-        $updatePayload['standings_blood'] = round($standingsBlood + (10 - $standingsBlood) * ($skillCheck * 0.04), 2);
-        $updatePayload['standings_eden'] = $standings->get(500027, 0);
-        $updatePayload['standings_trig'] = $standings->get(500026, 0);
+            // Fetch the mining data
+            foreach ($pilotsToUpdate as $character) {
+                $miningData = DB::table('character_minings')
+                    ->join('invTypes', 'character_minings.type_id', '=', 'invTypes.typeID')
+                    ->where('character_minings.character_id', $character)
+                    ->where('character_minings.date', '>=', Carbon::now()->subDays(30))
+                    ->select('character_minings.type_id', DB::raw('SUM(character_minings.quantity) as total_quantity'), 'invTypes.volume')
+                    ->groupBy('character_minings.type_id', 'invTypes.volume')
+                    ->get();
+    
+                $total_m3_sum = 0;
+                $total_value_sum = 0;
+    
+                // Process the mining data as needed
+                foreach ($miningData as $data) {
+                    $total_m3 = $data->total_quantity * $data->volume;
+                    $total_m3_sum += $total_m3;
+    
+                    // Calculate the total value
+                    $materials = DB::table('invTypeMaterials')
+                        ->where('typeID', $data->type_id)
+                        ->get(['materialTypeID', 'quantity']);
+    
+                    $total_value = 0;
+    
+                    foreach ($materials as $material) {
+                        $adjusted_price = DB::table('market_prices')
+                            ->where('type_id', $material->materialTypeID)
+                            ->value('average_price');
+                        $material_value = $adjusted_price * $material->quantity;
+                        $total_value += $material_value;
+                    }
+                    $total_value *= $data->total_quantity;
+                    $total_value_sum += $total_value;
+                }
+                $total_value_sum = round($total_value_sum / 100 * 0.9, 2);
+                DB::table('decoy_user_dashboard')
+                        ->where('character_id', $character)
+                        ->update(['mining_value' => $total_value_sum, 'mining_m3' => $total_m3_sum]);
+            }
 
-        // Fleets & Killmails Counts
-        $updatePayload['fleets'] = $fleetCounts[$characterId] ?? 0;
-        $updatePayload['killmails'] = $killmailCounts->get($characterId, 0);
 
-        // Killboard Valuation
-        $totalKillValue = 0;
-        if ($pilotKills = $rawKillmailItems->get($characterId)) {
-            $groupedByKill = $pilotKills->groupBy('killmail_id');
-            foreach ($groupedByKill as $killItems) {
-                $first = $killItems->first();
-                $shipValue = $marketPrices->get($first->ship_type_id, 0);
+        // Fetch the industry slots
+            foreach ($pilotsToUpdate as $character) {
+                // Initialize the manufacturing slots total
+                $manufacturing_slots_total = 1;
+                $research_slots_total = 1;
+                $reaction_slots_total = 1;
+        
+                // Query the character_skills table for the specified skill_ids
+                $skills = DB::table('character_skills')
+                    ->where('character_id', $character)
+                    ->whereIn('skill_id', [3387, 24625, 3406, 24624, 45748, 45749])
+                    ->pluck('trained_skill_level', 'skill_id');
+        
+                // Get the values for each skill_id, defaulting to 0 if not found
+                $mp = $skills[3387] ?? 0;
+                $amp = $skills[24625] ?? 0;
+                $lo = $skills[3406] ?? 0;
+                $alp = $skills[24624] ?? 0;
+                $mr = $skills[45748] ?? 0;
+                $amr = $skills[45749] ?? 0;
+        
+                // Calculate the manufacturing slots total
+                $manufacturing_slots_total += $mp + $amp;
+                $research_slots_total += $lo + $alp;
+                $reaction_slots_total += $mr + $amr;
+        
+                DB::table('decoy_user_dashboard')
+                            ->where('character_id', $character)
+                            ->update([
+                            'industry_manufacturing_slots_total' => $manufacturing_slots_total,
+                            'industry_research_slots_total' => $research_slots_total,
+                            'industry_reaction_slots_total' => $reaction_slots_total,
+                            ]);
+            }
 
-                $contentsValue = 0;
-                foreach ($killItems as $item) {
-                    if ($item->item_type_id) {
-                        $qty = ($item->quantity_destroyed ?? 0) + ($item->quantity_dropped ?? 0);
-                        $contentsValue += $qty * $marketPrices->get($item->item_type_id, 0);
+            // Fetch active industry jobs
+
+            foreach ($pilotsToUpdate as $character) {
+                $manufacturing_jobs = 0;
+                $research_jobs = 0;
+                $reaction_jobs = 0;
+    
+                $industry_jobs = DB::table('character_industry_jobs')
+                ->where('character_id', $character)
+                ->where('status', 'active')
+                ->pluck('activity_id');
+    
+                foreach ($industry_jobs as $job) {
+                    if ($job == 1) {
+                        $manufacturing_jobs++;
+                    } elseif ($job == 9) {
+                        $reaction_jobs++;
+                    } else {
+                        $research_jobs++;
                     }
                 }
-                $totalKillValue += ($shipValue + $contentsValue + 10000);
-            }
-        }
-        $updatePayload['kill_value'] = $totalKillValue;
-
-        // Wallet Metrics
-        $updatePayload['isk_total'] = $allWalletBalances->get($characterId, 0);
-
-        $journals = $allWalletJournals->get($characterId, collect());
-        $updatePayload['isk_ratting'] = $journals->where('ref_type', 'bounty_prizes')->sum('amount');
-        $updatePayload['isk_missions'] = $journals->whereIn('ref_type', ['agent_mission_reward', 'agent_mission_time_bonus_reward'])->sum('amount');
-        $updatePayload['isk_incursions'] = $journals->where('ref_type', 'corporate_reward_payout')->sum('amount');
-
-        // Escrow/Market Orders
-        $orders = $allOrders->get($characterId, collect());
-        $marketValue = 0;
-        foreach ($orders as $order) {
-            $marketValue += ($order->volume_remain * $order->price);
-        }
-        $updatePayload['isk_market'] = $marketValue;
-
-        // Mining Yield Ingestion
-        $miningRecords = $allMiningData->get($characterId, collect())->groupBy('type_id');
-        $totalM3Sum = 0;
-        $totalValSum = 0;
-
-        foreach ($miningRecords as $typeId => $records) {
-            $totalQty = $records->sum('quantity');
-            $volume = $invTypesVolume->get($typeId, 0);
-            $totalM3Sum += ($totalQty * $volume);
-
-            if ($materials = $invTypeMaterials->get($typeId)) {
-                $itemUnitValue = 0;
-                foreach ($materials as $mat) {
-                    $itemUnitValue += ($marketPrices->get($mat->materialTypeID, 0) * $mat->quantity);
-                }
-                $totalValSum += ($itemUnitValue * $totalQty);
-            }
-        }
-        $updatePayload['mining_value'] = round($totalValSum / 100 * 0.9, 2);
-        $updatePayload['mining_m3'] = $totalM3Sum;
-
-        // Industry Limits & Jobs
-        $indySkills = $allIndustrySlots->get($characterId, collect())->pluck('trained_skill_level', 'skill_id');
-        $updatePayload['industry_manufacturing_slots_total'] = 1 + $indySkills->get(3387, 0) + $indySkills->get(24625, 0);
-        $updatePayload['industry_research_slots_total'] = 1 + $indySkills->get(3406, 0) + $indySkills->get(24624, 0);
-        $updatePayload['industry_reaction_slots_total'] = 1 + $indySkills->get(45748, 0) + $indySkills->get(45749, 0);
-
-        $indyJobs = $allActiveIndyJobs->get($characterId, collect());
-        $updatePayload['industry_manufacturing_slots'] = $indyJobs->where('activity_id', 1)->count();
-        $updatePayload['industry_reaction_slots'] = $indyJobs->where('activity_id', 9)->count();
-        $updatePayload['industry_research_slots'] = $indyJobs->whereNotIn('activity_id', [1, 9])->count();
-
-        // Planetary Interaction Data Array Mapping
-        $planets = $allPlanets->get($characterId, collect());
-        foreach ($planets as $planet) {
-            $planet->user = $characterId;
-            $planet->planet_name = $planetNames->get($planet->planet_id, 'Unknown');
-
-            switch ($planet->planet_type) {
-                case 'barren': $planet->image = 2016; break;
-                case 'gas': $planet->image = 13; break;
-                case 'ice': $planet->image = 12; break;
-                case 'lava': $planet->image = 2015; break;
-                case 'oceanic': $planet->image = 2014; break;
-                case 'plasma': $planet->image = 2063; break;
-                case 'storm': $planet->image = 2017; break;
-                case 'temperate': $planet->image = 11; break;
-                default: $planet->image = null; break;
+    
+                DB::table('decoy_user_dashboard')
+                ->where('character_id', $character)
+                ->update([
+                'industry_manufacturing_slots' => $manufacturing_jobs,
+                'industry_research_slots' => $research_jobs,
+                'industry_reaction_slots' => $reaction_jobs,
+                ]);
+    
             }
 
-            $pinKey = $characterId . '-' . $planet->planet_id;
-            $planet->extractor_end = $planetPins->has($pinKey) ? $planetPins->get($pinKey)->first()->expiry_time : null;
-        }
-        $updatePayload['planets'] = json_encode($planets);
-        $updatePayload['updated_at'] = now();
+            // Fetch the planets
 
-        $rows[] = $updatePayload;
+            foreach ($pilotsToUpdate as $character) {
+
+                $planets = DB::table('character_planets')
+                    ->where('character_id', $character)
+                    ->orderBy('planet_id', 'asc')
+                    ->get(['planet_id', 'planet_type']);
+    
+                    foreach ($planets as $planet) {
+                        $planet->user = $character;
+                    
+                        // Fetch planet name
+                        $planet->planet_name = DB::table('planets')
+                            ->where('planet_id', $planet->planet_id)
+                            ->value('name');
+                    
+                        // Set the planet image based on type
+                        switch ($planet->planet_type) {
+                            case 'barren': $planet->image = 2016; break;
+                            case 'gas': $planet->image = 13; break;
+                            case 'ice': $planet->image = 12; break;
+                            case 'lava': $planet->image = 2015; break;
+                            case 'oceanic': $planet->image = 2014; break;
+                            case 'plasma': $planet->image = 2063; break;
+                            case 'storm': $planet->image = 2017; break;
+                            case 'temperate': $planet->image = 11; break;
+                            default: $planet->image = null; break;
+                        }
+                    
+                        // Fetch extractor end time
+                        $planet->extractor_end = DB::table('character_planet_pins')
+                            ->where('character_id', $character)
+                            ->where('planet_id', $planet->planet_id)
+                            ->orderBy('expiry_time', 'desc')
+                            ->value('expiry_time');
+                    }
+                    
+                    DB::table('decoy_user_dashboard')
+                        ->where('character_id', $character)
+                        ->update([
+                            'planets' => $planets,
+                        ]);
+            }
+
+        
     }
-
-    // 5. Batched write — chunked upsert instead of one UPDATE per pilot
-    if (!empty($rows)) {
-        $updateColumns = [
-            'name', 'sec', 'home', 'training_until', 'training_skills',
-            'standings_blood', 'standings_eden', 'standings_trig',
-            'fleets', 'killmails', 'kill_value',
-            'isk_total', 'isk_market', 'isk_ratting', 'isk_incursions', 'isk_missions',
-            'mining_value', 'mining_m3',
-            'industry_manufacturing_slots', 'industry_manufacturing_slots_total',
-            'industry_research_slots', 'industry_research_slots_total',
-            'industry_reaction_slots', 'industry_reaction_slots_total',
-            'planets', 'updated_at',
-        ];
-
-        DB::transaction(function () use ($rows, $updateColumns) {
-            foreach (array_chunk($rows, 500) as $chunk) {
-                DB::table('decoy_user_dashboard')->upsert($chunk, ['character_id'], $updateColumns);
-            }
-        });
-    }
-}
 
     /**
      * Define tags for the job (optional).
