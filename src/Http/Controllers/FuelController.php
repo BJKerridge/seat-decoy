@@ -75,7 +75,7 @@ class FuelController extends Controller
     ? Carbon::now()
         ->addHours(
             (CorporationStarbaseFuel::where('starbase_id', $starbase->starbase_id)
-                ->where('type_id', 4246)
+                ->whereIn('type_id', [4246, 4247, 4051, 4312])
                 ->pluck('quantity')
                 ->first() ?? 0) / 
             (InvControlTowerResource::where('controlTowerTypeID', $starbase->type_id)
